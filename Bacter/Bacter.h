@@ -10,13 +10,25 @@ namespace Bacter
 	{
 	public:
 		Bacter(const Bacter & i_prev);
+		Bacter() {};
+
+	public:
+		enum status
+		{
+			ok = 0,
+			dead,
+			moved
+		};
 
 		// Properties:
 	public:
 		int64_t m_hash = 0;
 		bool m_ignoreNextIteration = false;
-		int8_t m_speed = 0;
-		int8_t m_aggro = 0;
-		uint8_t m_food = 50; // between 0 and 100;
+		float m_speed = 0; // from 0 to 100
+		float m_aggro = 0; // from 0 to 100
+		float m_vegan = 0; // from 0 to 100
+		float m_food = 50; // between 0 and 100;
+
+		int8_t m_status = false;
 	};
 }

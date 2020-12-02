@@ -13,7 +13,8 @@ namespace Bacter
 {
 	class Results
 	{
-
+	public:
+		uint32_t m_bactersCount = 0;
 	};
 
 	class Cell
@@ -30,9 +31,14 @@ namespace Bacter
 	public:
 		std::vector<std::shared_ptr<Bacter>> m_bacters;
 
+		// Food in it:
+	public:
+		float m_food = 0;
+
 		// Functions:
 	public:
 		void Run();
+		void Populate(const uint32_t& i_number, const std::shared_ptr<Bacter>& i_bacter);
 		void GetStatistics(std::shared_ptr<Results> & o_results);
 	};
 
@@ -41,6 +47,7 @@ namespace Bacter
 	public:
 		Grid(const uint32_t i_width, const uint32_t i_height);
 		void Run();
+		void Populate(const uint32_t& i_number, const std::shared_ptr<Bacter>& i_bacter);
 		void GetStatistics(std::shared_ptr<Results> & o_results);
 
 	private:
