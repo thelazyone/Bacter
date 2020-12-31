@@ -26,7 +26,7 @@ int main()
 
 	// Adding bacters?
 
-	std::chrono::steady_clock::time_point time1 = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point time1 = std::chrono::steady_clock::now(); 
 
 	// Testing stuff
 	std::shared_ptr<Bacter::Results> testResults = std::make_shared<Bacter::Results>();
