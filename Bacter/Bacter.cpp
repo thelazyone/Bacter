@@ -27,4 +27,6 @@ Bacter::Bacter::Bacter(const Bacter & i_prev)
 	m_speed = MutateValue(i_prev.m_speed);
 	m_aggro = MutateValue(i_prev.m_aggro);
 	m_vegan = MutateValue(i_prev.m_vegan);
+	m_diet = MutateValue(i_prev.m_vegan);
+	m_size = MutateValue(i_prev.m_vegan);
 }

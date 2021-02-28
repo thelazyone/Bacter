@@ -5,6 +5,11 @@
 #include "Grid.h"
 #include "Bacter.h"
 
+// Socket IO using HTTPRequest https://github.com/elnormous/HTTPRequest
+#include "HTTPRequest.hpp"
+
+//// For debug only.
+#include <iostream>
 
 namespace constants
 {
@@ -25,6 +30,9 @@ namespace constants
 
 Bacter::Grid::Grid(const uint32_t i_width, const uint32_t i_height)
 {
+	m_width = i_width;
+	m_height = i_height;
+
 	// Building up a vector for the torus.
 	std::vector<std::shared_ptr<Cell>> col(i_height);
 	std::vector<std::vector<std::shared_ptr<Cell>>> gridSpace(i_width, col);
@@ -69,6 +77,9 @@ Bacter::Grid::Grid(const uint32_t i_width, const uint32_t i_height)
 
 void Bacter::Grid::Run()
 {
+	// Increasing the counter.
+	m_iterationCounter++;
+
 	// Starting with the root
 	std::shared_ptr<Cell> currCell = m_rootCell;
 	currCell->Run();
@@ -93,8 +104,21 @@ void Bacter::Grid::Populate(const uint32_t & i_number, const std::shared_ptr<Bac
 	}
 }
 
+
+void Bacter::Grid::GetGridSize(uint32_t & o_width, uint32_t & o_height)
+{
+	o_width = m_width;
+	o_height = m_height;
+}
+
+
 void Bacter::Grid::GetStatistics(std::shared_ptr<Results>& o_results)
 {
+	// Filling the global info:
+	o_results->m_gridH = m_height;
+	o_results->m_gridW = m_width;
+	o_results->m_iterationNumber = m_iterationCounter;
+
 	// Starting with the root
 	std::shared_ptr<Cell> currCell = m_rootCell;
 	currCell->GetStatistics(o_results);
@@ -105,7 +129,6 @@ void Bacter::Grid::GetStatistics(std::shared_ptr<Results>& o_results)
 		currCell = currCell->m_next;
 	}
 }
-
 
 
 void Bacter::Cell::Run()
@@ -264,10 +287,24 @@ void Bacter::Cell::Run()
 
 void Bacter::Cell::GetStatistics(std::shared_ptr<Results>& o_results)
 {
-	o_results->m_bactersCount += m_bacters.size();
+	// Adding a new cell to the results.
+	CellResults cellResults;
 
-	// Doing stuff here
-	// TODO
+	cellResults.m_food = 0; // TODO set FooD COUNTER!
+
+	// Filling the bacters
+	cellResults.m_bacters.reserve(m_bacters.size());
+	for (const auto & elem : m_bacters)
+	{
+		cellResults.m_bacters.emplace_back(
+			elem->m_size,
+			elem->m_speed,
+			elem->m_diet,
+			elem->m_hash);
+	}
+
+	// ADDING TO THE FINAL LIST
+	o_results->m_cells.push_back(cellResults);
 }
 
 void Bacter::Cell::Populate(const uint32_t& i_number, const std::shared_ptr<Bacter>& i_bacter)
@@ -277,4 +314,85 @@ void Bacter::Cell::Populate(const uint32_t& i_number, const std::shared_ptr<Bact
 	{
 		m_bacters.push_back(std::shared_ptr<Bacter>(new Bacter(*i_bacter)));
 	}
+}
+
+
+Bacter::HTTPInterface::HTTPInterface(const std::string & i_addr, const uint32_t & i_port)
+{
+	m_address = i_addr;
+	m_port = i_port;
+}
+
+
+void Bacter::HTTPInterface::SendGridStatistics(std::shared_ptr<Results>& i_results)
+{
+	try
+	{
+		// you can pass http::InternetProtocol::V6 to Request to make an IPv6 request
+		http::Request request(m_address);
+
+		// send a get request
+		const http::Response response = request.send("POST", SerializeResults(i_results)); // TODO make it as reference
+		std::cout << std::string(response.body.begin(), response.body.end()) << '\n'; // print the result
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Request failed, error: " << e.what() << '\n';
+	}
+}
+
+
+std::string Bacter::HTTPInterface::SerializeResults(std::shared_ptr<Results>& i_results)
+{
+	// Caculating the output size: 
+	// Header size is 12 bytes
+	uint32_t stringSize = 12;
+
+	//// For each cell, adding the size of the header (8 for now)
+	//uint32_t tempH = 0;
+	//uint32_t tempW = 0;
+	//stringSize += (i_results->m_gridH * i_results->m_gridW) * 8;
+	//for (const auto & cellElem : i_results->m_cells)
+	//{
+	//	stringSize += 20 * cellElem.m_bacters.size();
+	//}
+
+	// Instantiating the string now.
+	std::vector<unsigned char> outCharBuf(stringSize, '0');
+	uint32_t writeCounter = 0;
+	
+	// Filling the header:
+	memcpy(outCharBuf.data(), reinterpret_cast<unsigned char*>(&i_results->m_iterationNumber), 4);
+	memcpy(outCharBuf.data() + 4, reinterpret_cast<unsigned char*>(&i_results->m_gridH), 4);
+	memcpy(outCharBuf.data() + 8, reinterpret_cast<unsigned char*>(&i_results->m_gridW), 4);
+	writeCounter += 12;
+
+	//// Filling eache cell:
+	//uint32_t tempSize = 0;
+	//for (auto & cellElem : i_results->m_cells)
+	//{
+	//	tempSize = cellElem.m_bacters.size();
+	//	memcpy(outCharBuf.data() + writeCounter, reinterpret_cast<unsigned char*>(&tempSize), 4);
+	//	memcpy(outCharBuf.data() + writeCounter + 4, reinterpret_cast<unsigned char*>(&cellElem.m_food), 4);
+	//	writeCounter += 8;
+
+	//	// Filling for each bacter
+	//	for (auto & bactElem : cellElem.m_bacters)
+	//	{
+	//		memcpy(outCharBuf.data() + writeCounter,
+	//			reinterpret_cast<unsigned char*>(&bactElem.m_size), 4);
+	//		memcpy(outCharBuf.data() + writeCounter + 4,
+	//			reinterpret_cast<unsigned char*>(&bactElem.m_speed), 4);
+	//		memcpy(outCharBuf.data() + writeCounter + 8,
+	//			reinterpret_cast<unsigned char*>(&bactElem.m_diet), 4);
+	//		memcpy(outCharBuf.data() + writeCounter + 12,
+	//			reinterpret_cast<unsigned char*>(&bactElem.m_hash), 8);
+	//		writeCounter += 20;
+	//	}
+	//}
+
+	std::string outStr(
+		reinterpret_cast<const char*>(outCharBuf.data()),
+		outCharBuf.size());
+	return outStr;
 }

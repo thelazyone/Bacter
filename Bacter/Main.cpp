@@ -5,11 +5,15 @@
 #include "Grid.h"
 #include "Bacter.h"
 
+
+
 int main()
 {
 	std::cout << "Bacter - First Tests" << std::endl;
-
 	std::chrono::steady_clock::time_point time0 = std::chrono::steady_clock::now();
+
+	// Connection
+	Bacter::HTTPInterface webInterface("http://93ec7746add2.ngrok.io/add/data", 3000);
 
 	// Creating a grid
 	Bacter::Grid testGrid (100, 100);
@@ -36,33 +40,43 @@ int main()
 		testGrid.Run();
 
 		// Retrieving statistics
-		if (i % 10 == 0)
+		if (i % 100 == 0)
 		{
 			testResults.reset(new Bacter::Results());
 			testGrid.GetStatistics(testResults);
-			std::cout << "found " << testResults->m_bactersCount << " bacters at iteration " << i << "." << std::endl;
+
+			// Sending the results.
+			webInterface.SendGridStatistics(testResults);
+
+			uint32_t bactCounter = 0;
+			for (const auto & cellElem : testResults->m_cells)
+			{
+				bactCounter += cellElem.m_bacters.size();
+			}
+
+			std::cout << "found " << bactCounter <<
+				" bacters at iteration " << testResults->m_iterationNumber << "." << std::endl;
 			std::cout << "done." << std::endl;
 
-			ofs << testResults->m_bactersCount << std::endl;
+			ofs << bactCounter << std::endl; // todo tbr
 		
 			// If all dead, break.
-			if (testResults->m_bactersCount == 0)
+			if (bactCounter == 0)
 			{
-				break;
+				std::cout << "EXTINCTION EVENT!" << std::endl;
+				return 0;
 			}
 		}
 	}
 
-	std::chrono::steady_clock::time_point time2 = std::chrono::steady_clock::now();
-
 	// Writing performances
+	std::chrono::steady_clock::time_point time2 = std::chrono::steady_clock::now();
 	std::cout << "time for grid creation: " <<
 		std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count()
 		<< " ms." << std::endl;
 	std::cout << "time for test run: " <<
 		std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
 		<< " ms." << std::endl;
-
 	
 	std::cin.get();
 }

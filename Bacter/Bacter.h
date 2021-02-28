@@ -28,6 +28,8 @@ namespace Bacter
 		float m_aggro = 0; // from 0 to 100
 		float m_vegan = 0; // from 0 to 100
 		float m_food = 50; // between 0 and 100;
+		float m_diet = 0; // TO ADD IN THE LOGIC!
+		float m_size = 0; // TO ADD IN THE LOGIC!
 
 		int8_t m_status = false;
 	};
