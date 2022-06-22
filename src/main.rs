@@ -28,15 +28,19 @@ struct Model {
 
 fn model(_app: &App) -> Model {
     let boundary = _app.window_rect();
-    let mut curr_model = Model {
-        dish : cell::dish::Dish::new(cell::cell::Float2D{x: boundary.w() as f64, y: boundary.h() as f64}, 100)
+    let curr_model = Model {
+        dish : cell::dish::Dish::new(
+            cell::cell::Float2D{x: boundary.w() as f64, y: boundary.h() as f64},
+            100)
     };
     curr_model
 }
 
 
 fn update(app: &App, model: &mut Model, _update: Update) {
-   model.dish.interact();
+    for _ in 0..1000 { 
+        model.dish.interact();
+    }
 }
 
 
@@ -56,8 +60,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
         .x_y(
             bacter.get_vector().pos.x as f32, 
             bacter.get_vector().pos.y as f32)
-        .radius(5.);
+        .radius(5.).resolution(8.);
     }
+
+    draw.text(&app.duration.since_prev_update.as_millis().to_string().to_owned());
 
     // put everything on the frame
     draw.to_frame(app, &frame).unwrap();

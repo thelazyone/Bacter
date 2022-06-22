@@ -18,8 +18,12 @@ impl Float2D
         Float2D::new(self.x * factor,self.y * factor)
     }
 
-    fn distance (&mut self, other : Float2D) -> f64{
-        ((self.x - other.x).powf(2.) + (self.y - other.y).powf(2.)).sqrt()
+    fn distance_square (&self, other : Float2D) -> f64{
+        ((self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y))
+    }
+
+    fn distance (&self, other : Float2D) -> f64{
+        Float2D::distance_square(self, other).sqrt()
     }
 
     fn versor (&mut self, other : Float2D) -> Float2D{
@@ -156,28 +160,34 @@ impl Bacter{
         }
     }
 
-    pub fn bounce_with_cells<T>(&mut self, other_cells: &[T])
+    pub fn bounce_with_cells<T>(&mut self, other_cells: &[T]) -> Option<i64>
     where T: Cell{
 
+        let mut last_interaction_index: i64 = -1;
         // Cycle on the vector of cells. for each, checking if the distance is below a certain point:
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
         for other in other_cells{
             if other.get_index() != self.index{
-                let cells_distance: f64 = self.bacter_vector.pos.distance(other.get_vector().pos);
-                if  cells_distance > 0.1 && cells_distance < 10. {
+                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other.get_vector().pos);
+                if  cells_distance > 0.1 && cells_distance < 100. {
 
                     // Reversing the speed:
                     // V = |V| * -ver(A-B) 
                     self.bacter_vector.vel =
                     self.bacter_vector.pos.versor(other.get_vector().pos).multiply(self.bacter_vector.vel.abs());
 
-                    // println!("distance is {}, vel x: {}, vel y:{}", 
-                    // cells_distance, 
-                    // self.bacter_vector.vel.x,
-                    // self.bacter_vector.vel.y);
+                    // updating the interacting index:
+                    last_interaction_index = other.get_index();
                 }
             }
+        }
+
+        if last_interaction_index >= 0 {
+            return Some(last_interaction_index);
+        }
+        else {
+            return None;
         }
     } 
 
@@ -197,3 +207,18 @@ impl Cell for Bacter{
         self.index
     }
 }
+
+
+// // Thanks to https://github.com/diego411/Dankgine modified for my application
+// // Index I corresponds to the current cell, index J is the cell to look for
+// fn get_other_mut<'a, T>(i: usize, k: usize, vec: &'a mut Vec<T>) -> Option<(&'a mut T)> {
+//     let vec_length = vec.len();
+//     if i == k {
+//         return None;
+//     } 
+//     else if i >= vec_length || k >= vec_length {
+//         return None;
+//     }
+
+//     return Some((vec.get_mut(k).unwrap()));
+// }
