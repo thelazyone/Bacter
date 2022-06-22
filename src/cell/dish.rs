@@ -6,6 +6,7 @@ pub struct Dish {
     iter_no: i32,
     boundary: cell::Float2D,
     duration_counter: f64,
+    cells_counter: i64,
 }
 
 impl Dish{
@@ -15,12 +16,14 @@ impl Dish{
             iter_no: 0,
             boundary: i_bound_rect,
             duration_counter: 0.,
+            cells_counter: 0,
         };
     
         for idx in 0..i_cells_number {
             curr_model.bacters.push(
                 cell::Bacter::new_random(curr_model.boundary, idx));
         };
+        curr_model.cells_counter = i_cells_number;
         curr_model
     }
 
@@ -39,20 +42,41 @@ impl Dish{
         for i in 0..self.bacters.len() {
             // Todo make an interact_with_cells which calls bounce_with_cells
             // and any other interaction, including fight and eating 
-            if let Some(target_idx)  = self.bacters[i].bounce_with_cells(&curr_bodies){
+            if let Some(target_idx) = self.bacters[i].bounce_with_cells(&curr_bodies){
                 // If interaction happened, proceeding with confrontation, eating and so forth.
-                
+                println!("Trying a kill ({} on {})", i, target_idx);
+                if self.bacters[i].try_kill_bacter(curr_bodies[target_idx]){
+                    self.bacters[target_idx].kill();
+                    println!("Bacter {} killed bacter {}", i, target_idx);
+                }
+                else
+                {
+                    println!("try kill returned false!");
+                }
             }
-        }
-
-        // Consuming food
-        for i in 0..self.bacters.len() {
-            self.bacters[i].consume_food(0.01); // TODO : the time is not the same of the movements! MAGIC NUMBER
         }
     
         // Applying the movement after all checks.
         for i in 0..self.bacters.len() {
-            self.bacters[i].apply_movement(0.5); // TODO - remove the MAGIC NUMBER
+            self.bacters[i].apply_movement(0.25); // TODO - remove the MAGIC NUMBER
+        }
+
+        // Consuming food
+        for i in 0..self.bacters.len() {
+            // TODO : the time is not the same of the movements! MAGIC NUMBER
+            self.bacters[i].consume_food(0.0001); 
+        }
+
+        // Reproducing if necessary!
+        for i in 0..self.bacters.len() {
+            // TODO : the time is not the same of the movements! MAGIC NUMBER
+            if let Some(mut offspring) =self.bacters[i].try_reproducing(){
+                offspring.set_index(self.cells_counter as i64);
+                self.cells_counter += 1;
+                self.bacters.push(offspring);
+
+            println!("new Generation for bacter {}! There are {} bacters", i, self.bacters.len());
+            }
         }
 
         // !! IMPORTANT !! This operation must be done last, becaue the order of the elements is not kept!

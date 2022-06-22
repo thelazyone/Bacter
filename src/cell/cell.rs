@@ -36,7 +36,7 @@ impl Float2D
         }
     }
 
-    fn abs (&mut self) -> f64{
+    fn abs (&self) -> f64{
         self.distance(Float2D{x:0., y:0.})
     }
 
@@ -121,8 +121,8 @@ pub struct Bacter{
 impl Bacter{
     pub fn new_random(area_size : Float2D, index: i64) -> Bacter{
         let mut rng = rand::thread_rng();
-        let temp_size = rng.gen::<f32>() - 0.5;
-        let temp_aggro = rng.gen::<f32>() - 0.5;
+        let temp_size = rng.gen::<f32>();
+        let temp_aggro = rng.gen::<f32>();
         Bacter{
             bacter_vector : Vector2D{
                 pos: Float2D{
@@ -188,44 +188,82 @@ impl Bacter{
         }
     }
 
-    pub fn bounce_with_cells<T>(&mut self, other_cells: &[T]) -> Option<i64>
+    pub fn bounce_with_cells<T>(&mut self, other_cells: &[T]) -> Option<usize>
     where T: Cell{
 
-        let mut last_interaction_index: i64 = -1;
+        let mut last_interaction_index: Option<usize> = None;
         // Cycle on the vector of cells. for each, checking if the distance is below a certain point:
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
-        for other in other_cells{
-            if other.get_index() != self.index{
-                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other.get_vector().pos);
-                let cells_impact_distance = 10. * (self.get_size() + other.get_size()) as f64;
+        for i in 0..other_cells.len(){
+            if other_cells[i].get_index() != self.index{
+                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
+                let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
                 if  cells_distance > 0.1 && cells_distance < cells_impact_distance * cells_impact_distance {
 
                     // Reversing the speed:
                     // V = |V| * -ver(A-B) 
                     self.bacter_vector.vel =
-                    self.bacter_vector.pos.versor(other.get_vector().pos).multiply(self.bacter_vector.vel.abs());
+                    self.bacter_vector.pos.versor(other_cells[i].get_vector().pos).multiply(self.bacter_vector.vel.abs());
 
                     // updating the interacting index:
-                    last_interaction_index = other.get_index();
+                    last_interaction_index = Some(i);
                 }
             }
         }
 
-        if last_interaction_index >= 0 {
-            return Some(last_interaction_index);
-        }
-        else {
-            return None;
-        }
+        last_interaction_index
     } 
 
+    pub fn try_reproducing(&mut self) -> Option<Bacter>{
+
+        if self.dead{
+            return None;
+        }
+        // If the bacter's belly is full, creating an offspring.
+        // For now putting it in the same position.
+        if self.food_value > self.size * 100.{
+            
+            // Calculating the versor:
+            let versor = self.bacter_vector.vel.multiply(1. / self.bacter_vector.vel.abs());
+            
+            let offspring = Bacter::new(
+                self.bacter_vector.pos.add(
+                    Float2D {
+                        x: self.get_size()  as f64*2. * -10.1 * versor.x,
+                        y: self.get_size()  as f64*2. * -10.1 * versor.y,}),
+                self.bacter_vector.vel.multiply(-1.),
+                0, 
+                self.size, 
+                self.aggro);
+
+            self.food_value = self.food_value / 2.;
+            return Some(offspring);
+            
+        }
+        None
+    }
+
+    // Get Parameters: size
     pub fn get_size(&self) -> f32{
         self.size
     }
 
+    // Get Parameters: size
+    pub fn get_aggro(&self) -> f32{
+        self.aggro
+    }
+
     pub fn is_alive(&self) -> bool{
         !self.dead
+    }
+
+    pub fn kill(&mut self){
+        self.dead = true;
+    }
+
+    pub fn set_index(&mut self, index: i64){
+        self.index = index;
     }
 
     pub fn consume_food(&mut self, time: f64){
@@ -234,6 +272,28 @@ impl Bacter{
         if self.food_value < 0.{
             self.dead = true
         }
+    }
+
+    pub fn try_kill_bacter(&mut self, other : Bacter) -> bool {
+        
+        if self.dead || other.dead{
+            println!("you can't kill what is already dead");
+            return false;
+        }
+        // Checking the aggro probability: both the rng and the aggro range between 0 and 1.
+        // as a start, if rng > aggro, one tries to eat the other.
+        // Note that the "victim" cannot fight back.
+        let mut rng = rand::thread_rng();
+        if rng.gen::<f32>() < self.aggro{
+            // Adding a +- 0.5 chance to the size of the two.
+            if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
+
+                // the victim is killed, and the food transfered to capacity to the one eating.
+                self.food_value += other.food_value/* * self.aggro*/;
+                return true;
+            }
+        }
+        false
     }
 
 

@@ -6,6 +6,8 @@ use nannou::prelude::*;
 use std::thread;
 use std::time::Duration;
 
+use std::env;
+
 fn main() {
     // // // // Preparing the environment.
 
@@ -16,6 +18,9 @@ fn main() {
     // // //         thread::sleep(Duration::from_millis(1));
     // // //     }
     // // // });
+
+    env::set_var("RUST_BACKTRACE", "1");
+
 
     // Showing them on a plot:
     nannou::app(model).update(update).simple_window(view).size(500, 500).run();
@@ -63,7 +68,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
         .radius(10. * bacter.get_size()).resolution(8.);
     }
 
-    draw.text(&app.duration.since_prev_update.as_millis().to_string().to_owned());
+    //draw.text(&app.duration.since_prev_update.as_millis().to_string().to_owned());
+    //draw.text(&model.dish.bacters.len().to_string().to_owned());
 
     // put everything on the frame
     draw.to_frame(app, &frame).unwrap();
