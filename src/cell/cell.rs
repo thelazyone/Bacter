@@ -1,4 +1,5 @@
 use std::ops::Add;
+use nannou::prelude::ToPrimitive;
 use rand::Rng;
 
 // POINTS in 2D
@@ -76,12 +77,14 @@ pub trait Cell{
     fn get_vector(&self) -> Vector2D;
     fn set_pos(&mut self, pos: Float2D);
     fn get_index(&self) -> i64;
+    fn get_size(&self) -> f32;
 }
 
 // ALGA
 #[derive(Clone, Copy)]
 pub struct Alga{
     alga_vector : Vector2D,
+    food_value : f32,
 }
 impl Cell for Alga{
     fn get_vector(&self) -> Vector2D{
@@ -93,6 +96,9 @@ impl Cell for Alga{
     fn get_index(&self) -> i64{
         -1
     }
+    fn get_size(&self) -> f32{
+        10.
+    }
 }
 
 // BACTER
@@ -100,10 +106,23 @@ impl Cell for Alga{
 pub struct Bacter{
     bacter_vector : Vector2D,
     index : i64,
+
+    // Defining the parameters, from 0 to 1:
+    size : f32, // the bigger the stronger, but more food is needed
+    aggro: f32, // the higher the more chances to attack, and better digestion of bacters (and worse of plants).
+    
+    // Food in the stomach is 100 * size.
+    food_value : f32,
+
+    // Flag to see if the cell is dead and must be removed.
+    dead: bool,
 }
+
 impl Bacter{
     pub fn new_random(area_size : Float2D, index: i64) -> Bacter{
         let mut rng = rand::thread_rng();
+        let temp_size = rng.gen::<f32>() - 0.5;
+        let temp_aggro = rng.gen::<f32>() - 0.5;
         Bacter{
             bacter_vector : Vector2D{
                 pos: Float2D{
@@ -112,13 +131,22 @@ impl Bacter{
                 vel: Float2D{
                     x: (rng.gen::<f64>() - 0.5), 
                     y: (rng.gen::<f64>() - 0.5)}},
-            index: index,}
+                size: temp_size,
+                aggro: temp_aggro,
+                food_value: 50. * temp_size, // half-full belly.
+                index: index,
+                dead: false,}
     }
 
-    pub fn new(pos : Float2D, vel : Float2D, index: i64) -> Bacter{
-        Bacter{
-            bacter_vector : Vector2D{pos: pos, vel: vel},
-            index: index}
+    pub fn new(pos : Float2D, vel : Float2D, index: i64, size: f32, aggro: f32) -> Bacter{
+    Bacter{
+            bacter_vector : Vector2D{
+            pos: pos, vel: vel},
+            size: size,
+            aggro: aggro,
+            food_value: 50. * size, // half-full belly.
+            index: index,
+            dead:false,}
     }
 
     pub fn set_vel(&mut self, vel: Float2D){      
@@ -170,7 +198,8 @@ impl Bacter{
         for other in other_cells{
             if other.get_index() != self.index{
                 let cells_distance: f64 = self.bacter_vector.pos.distance_square(other.get_vector().pos);
-                if  cells_distance > 0.1 && cells_distance < 100. {
+                let cells_impact_distance = 10. * (self.get_size() + other.get_size()) as f64;
+                if  cells_distance > 0.1 && cells_distance < cells_impact_distance * cells_impact_distance {
 
                     // Reversing the speed:
                     // V = |V| * -ver(A-B) 
@@ -191,6 +220,22 @@ impl Bacter{
         }
     } 
 
+    pub fn get_size(&self) -> f32{
+        self.size
+    }
+
+    pub fn is_alive(&self) -> bool{
+        !self.dead
+    }
+
+    pub fn consume_food(&mut self, time: f64){
+        // Reduce the amount of food in the bacter's belly.
+        self.food_value -= self.size * time as f32;
+        if self.food_value < 0.{
+            self.dead = true
+        }
+    }
+
 
 }
 
@@ -206,9 +251,15 @@ impl Cell for Bacter{
     fn get_index(&self) -> i64{
         self.index
     }
+    fn get_size(&self) -> f32{
+        self.size
+    }
 }
 
 
+
+
+// Probably unnecessary?
 // // Thanks to https://github.com/diego411/Dankgine modified for my application
 // // Index I corresponds to the current cell, index J is the cell to look for
 // fn get_other_mut<'a, T>(i: usize, k: usize, vec: &'a mut Vec<T>) -> Option<(&'a mut T)> {

@@ -38,7 +38,7 @@ fn model(_app: &App) -> Model {
 
 
 fn update(app: &App, model: &mut Model, _update: Update) {
-    for _ in 0..1000 { 
+    for _ in 0..10 { 
         model.dish.interact();
     }
 }
@@ -60,7 +60,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         .x_y(
             bacter.get_vector().pos.x as f32, 
             bacter.get_vector().pos.y as f32)
-        .radius(5.).resolution(8.);
+        .radius(10. * bacter.get_size()).resolution(8.);
     }
 
     draw.text(&app.duration.since_prev_update.as_millis().to_string().to_owned());

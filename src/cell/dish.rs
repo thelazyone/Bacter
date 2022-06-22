@@ -41,17 +41,33 @@ impl Dish{
             // and any other interaction, including fight and eating 
             if let Some(target_idx)  = self.bacters[i].bounce_with_cells(&curr_bodies){
                 // If interaction happened, proceeding with confrontation, eating and so forth.
-                // TODO
+                
             }
         }
-    
-        // Checking if the cells are still alive, their food resources and reproduction
-        // TODO
+
+        // Consuming food
+        for i in 0..self.bacters.len() {
+            self.bacters[i].consume_food(0.01); // TODO : the time is not the same of the movements! MAGIC NUMBER
+        }
     
         // Applying the movement after all checks.
         for i in 0..self.bacters.len() {
-            self.bacters[i].apply_movement(2.5);
+            self.bacters[i].apply_movement(0.5); // TODO - remove the MAGIC NUMBER
         }
+
+        // !! IMPORTANT !! This operation must be done last, becaue the order of the elements is not kept!
+        // Checking if the cells are still alive, their food resources and reproduction
+        for i in (0..self.bacters.len()).rev() {
+            if !self.bacters[i].is_alive(){
+                self.bacters.swap_remove(i);
+            }
+        }
+
+        // Alternative - experimental!         
+        // self.bacters.drain_filter(|elem| {
+        //     !elem.is_alive()
+        // });
+
     }
 }
 
