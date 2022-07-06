@@ -1,5 +1,4 @@
 use std::ops::Add;
-use nannou::prelude::ToPrimitive;
 use rand::Rng;
 
 // POINTS in 2D
@@ -83,21 +82,51 @@ pub trait Cell{
 // ALGA
 #[derive(Clone, Copy)]
 pub struct Alga{
-    alga_vector : Vector2D,
+    alga_vector : Vector2D, // TODO maybe a Float2D would work instead. -> half memory usage!
     food_value : f32,
+    index : i64, // Maybe useless? TODO find if there's an implicit way to handle deletions.
+    dead : bool,
 }
+
 impl Cell for Alga{
     fn get_vector(&self) -> Vector2D{
-        self.alga_vector
+        self.alga_vector // TODO maybe a Float2D would work instead. -> half memory usage!
     }
     fn set_pos(&mut self, pos: Float2D){
         self.alga_vector.pos = pos;
     }
     fn get_index(&self) -> i64{
-        -1
+        self.index
     }
     fn get_size(&self) -> f32{
-        10.
+        0.1 //TODO MAGIC NUMBER
+    }
+}
+
+impl Alga {
+    // TODO is the index necessary?
+    pub fn new_random(area_size : Float2D, index: i64) -> Alga{
+        let mut rng = rand::thread_rng();
+        Alga { 
+            alga_vector: Vector2D{
+                pos: Float2D{
+                    x: (rng.gen::<f64>() - 0.5) * area_size.x, 
+                    y: (rng.gen::<f64>() - 0.5) * area_size.y}, 
+                vel: Float2D{
+                    x: 0., 
+                    y: 0.}},
+             food_value: 25., // TODO make it parametric (no MAGIC NUMBER)
+             index: index,
+             dead: false,
+        }
+    }
+
+    pub fn is_alive(&self) -> bool{
+        !self.dead
+    }
+
+    pub fn kill(&mut self) {
+        self.dead = true;
     }
 }
 
@@ -118,7 +147,7 @@ pub struct Bacter{
     dead: bool,
 }
 
-impl Bacter{
+impl Bacter {
     pub fn new_random(area_size : Float2D, index: i64) -> Bacter{
         let mut rng = rand::thread_rng();
         let temp_size = rng.gen::<f32>();
@@ -192,6 +221,7 @@ impl Bacter{
     where T: Cell{
 
         let mut last_interaction_index: Option<usize> = None;
+
         // Cycle on the vector of cells. for each, checking if the distance is below a certain point:
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
@@ -226,7 +256,7 @@ impl Bacter{
             
             // Calculating the versor:
             let versor = self.bacter_vector.vel.multiply(1. / self.bacter_vector.vel.abs());
-            
+            let mut rng = rand::thread_rng();
             let offspring = Bacter::new(
                 self.bacter_vector.pos.add(
                     Float2D {
@@ -234,8 +264,8 @@ impl Bacter{
                         y: self.get_size()  as f64*2. * -10.1 * versor.y,}),
                 self.bacter_vector.vel.multiply(-1.),
                 0, 
-                self.size, 
-                self.aggro);
+                (self.size + (rng.gen::<f32>() - 0.5) * 0.05).clamp(0.2, 1.0), // MAGIC NUMBER
+                (self.aggro + (rng.gen::<f32>() - 0.5) * 0.05).clamp(0.0, 1.0)); // MAGIC NUMBER
 
             self.food_value = self.food_value / 2.;
             return Some(offspring);
@@ -268,7 +298,7 @@ impl Bacter{
 
     pub fn consume_food(&mut self, time: f64){
         // Reduce the amount of food in the bacter's belly.
-        self.food_value -= self.size * time as f32;
+        self.food_value -= self.size * self.size * time as f32;
         if self.food_value < 0.{
             self.dead = true
         }
@@ -277,7 +307,7 @@ impl Bacter{
     pub fn try_kill_bacter(&mut self, other : Bacter) -> bool {
         
         if self.dead || other.dead{
-            println!("you can't kill what is already dead");
+            //println!("you can't kill what is already dead");
             return false;
         }
         // Checking the aggro probability: both the rng and the aggro range between 0 and 1.
@@ -289,10 +319,26 @@ impl Bacter{
             if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
 
                 // the victim is killed, and the food transfered to capacity to the one eating.
-                self.food_value += other.food_value/* * self.aggro*/;
+                self.food_value += other.food_value * 0.5; // TODO add a dampening factor?
                 return true;
             }
         }
+        false
+    }
+
+    pub fn try_eat_alga(&mut self, other : Alga) -> bool {
+        if self.dead || other.dead {
+            //println!("you can't kill what is already dead");
+            return false;
+        }
+
+        // Complementary to eating cells, the less the aggro the higher the chances to eat.
+        let mut rng = rand::thread_rng();
+        if rng.gen::<f32>() > self.aggro{
+            self.food_value += other.food_value;
+            return true;
+        }
+
         false
     }
 
@@ -315,21 +361,3 @@ impl Cell for Bacter{
         self.size
     }
 }
-
-
-
-
-// Probably unnecessary?
-// // Thanks to https://github.com/diego411/Dankgine modified for my application
-// // Index I corresponds to the current cell, index J is the cell to look for
-// fn get_other_mut<'a, T>(i: usize, k: usize, vec: &'a mut Vec<T>) -> Option<(&'a mut T)> {
-//     let vec_length = vec.len();
-//     if i == k {
-//         return None;
-//     } 
-//     else if i >= vec_length || k >= vec_length {
-//         return None;
-//     }
-
-//     return Some((vec.get_mut(k).unwrap()));
-// }
