@@ -24,6 +24,7 @@ The parameter a cell has determine its behaviour and properties.
 <p align="center">
 <img src="https://github.com/thelazyone/Bacter/blob/master/doc/Parameters.png" width="400" align="center" onclick="none">
 </p>
+
 Not all parameters will be subject to mutations (this indeed is something that could vary with future versions of the simulator), but it's probably wise to list them all here.
 * **Speed**: Movement speed in the 2D space. A faster cell could expect to interact with more other cells (including algae).
 * **Erratic**: Chances of changing direction of movement. The higher the value, the more static the cell becomes.
