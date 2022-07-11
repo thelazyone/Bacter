@@ -9,7 +9,7 @@ This is not, in any form, a simulation of a real biological environment. Evoluti
 ## World Rules
 Ignoring the implementation choices, the individual automata (**cells**) move in a 2D space with something that resembles a brownian motion. 
 <p align="center">
-<img src="https://github.com/thelazyone/Bacter/blob/master/doc/ShortLife.png" width="400" align="center" onclick="none">
+<img src="https://github.com/thelazyone/Bacter/blob/master/doc/ShortLife.png" width="400" align="center">
 </p>
 
 ### cells
@@ -22,7 +22,7 @@ Killing other cells also works in that direction, but it is a risky path, since 
 ### Parameters
 The parameter a cell has determine its behaviour and properties. 
 <p align="center">
-<img src="https://github.com/thelazyone/Bacter/blob/master/doc/Parameters.png" width="400" align="center" onclick="none">
+<img src="https://github.com/thelazyone/Bacter/blob/master/doc/Parameters.png?" width="400" align="center">
 </p>
 
 Not all parameters will be subject to mutations (this indeed is something that could vary with future versions of the simulator), but it's probably wise to list them all here.
