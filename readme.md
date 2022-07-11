@@ -1,6 +1,6 @@
 # Bacter
 **A simple evolution simulator with basic cellular automata**
-###### tags: `coding` `rust`
+
 ## Global Scope
 The application of genetic algorithms is a widespread and relatively efficient solution for optimizations in many fields. Removing all the usefulness from that, it is possible to simulate the environment of very simple entities while they compete for food and get a chance to multiply while passing a slightly modified version of their own parameters to the offsprings.
 The goal of this project is to observe not only how the population will move through generations towards one or more "local minima" in the parameters space, but also how the minima itself change with the mutating generations
@@ -8,6 +8,10 @@ The goal of this project is to observe not only how the population will move thr
 This is not, in any form, a simulation of a real biological environment. Evolution works with any set of rules, and the rules used here are meant to obtain interesting dynamics rather than an accurate representation of what happens in a petri dish.
 ## World Rules
 Ignoring the implementation choices, the individual automata (**cells**) move in a 2D space with something that resembles a brownian motion. 
+<p align="center">
+<img src="https://github.com/thelazyone/Bacter/blob/master/doc/ShortLife.png" width="400" align="center" onclick="none">
+</p>
+
 ### cells
 When they interact with other cells, the two can either interact (with a chance of one killing the other) or part ways in different directions.
 Over time, cells need to consume food: if the food reserve is depleted, the cell dies. If the food reserve exceeds a maximum, the cell splits in two, each with half of the food reserve and slightly different parameters. 
@@ -16,7 +20,11 @@ In order to procure food cells need to take it from the environment.
 A basic source of food can be algae, static cells that randomly appear in the environment and that can be eaten.
 Killing other cells also works in that direction, but it is a risky path, since the concept of predator and prey are fairly mixed up here.
 ### Parameters
-The parameter a cell has determine its behaviour and properties. Not all parameters will be subject to mutations (this indeed is something that could vary with future versions of the simulator), but it's probably wise to list them all here.
+The parameter a cell has determine its behaviour and properties. 
+<p align="center">
+<img src="https://github.com/thelazyone/Bacter/blob/master/doc/Parameters.png" width="400" align="center" onclick="none">
+</p>
+Not all parameters will be subject to mutations (this indeed is something that could vary with future versions of the simulator), but it's probably wise to list them all here.
 * **Speed**: Movement speed in the 2D space. A faster cell could expect to interact with more other cells (including algae).
 * **Erratic**: Chances of changing direction of movement. The higher the value, the more static the cell becomes.
 * **Aggressivity**: Chances of attacking a cell that came into contact.
