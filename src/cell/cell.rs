@@ -19,7 +19,7 @@ impl Float2D
     }
 
     fn distance_square (&self, other : Float2D) -> f64{
-        ((self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y))
+        (self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y)
     }
 
     fn distance (&self, other : Float2D) -> f64{
