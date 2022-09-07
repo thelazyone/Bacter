@@ -178,7 +178,7 @@ impl Bacter {
             dead:false,}
     }
 
-    pub fn set_vel(&mut self, vel: Float2D){      
+    pub fn _set_vel(&mut self, vel: Float2D){      
         self.bacter_vector.vel = vel;
     }
     pub fn apply_movement(&mut self, time: f64){
@@ -280,7 +280,7 @@ impl Bacter {
     }
 
     // Get Parameters: size
-    pub fn get_aggro(&self) -> f32{
+    pub fn _get_aggro(&self) -> f32{
         self.aggro
     }
 

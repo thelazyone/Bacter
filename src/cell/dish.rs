@@ -12,7 +12,7 @@ pub struct Dish {
     pub algae: Vec<cell::Alga>, 
     iter_no: i32,
     boundary: cell::Float2D,
-    duration_counter: f64,
+    _duration_counter: f64,
     cells_counter: i64,
     algae_counter: i64,
 }
@@ -25,7 +25,7 @@ impl Dish{
             algae: vec![],
             iter_no: 0,
             boundary: i_bound_rect,
-            duration_counter: 0.,
+            _duration_counter: 0.,
             cells_counter: 0,
             algae_counter: 0,
         };

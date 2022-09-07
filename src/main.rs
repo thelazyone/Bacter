@@ -1,6 +1,5 @@
 mod cell;
-use cell::cell::Cell;
-//use nannou::prelude::*;
+use std::time::{Instant};
 
 use std::env;
 
@@ -17,10 +16,12 @@ fn main() {
             100);
 
     // Temp - for now iterating and outputting some info.
-    for _ in 0..25 { 
+    let start = Instant::now();
+    for _ in 0..100 { 
         for _ in 0..1000 { 
         dish.simulation_step();
         }
-        println!("there are {} bacters", dish.bacters.len());
+        println!("Iteration {}: there are {} bacters and {} algae.", dish.get_iteration(), dish.bacters.len(), dish.algae.len());
     }
+    println!("Test run executed in {:?}", start.elapsed());
 }
