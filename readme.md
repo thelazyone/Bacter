@@ -54,17 +54,22 @@ An expected cycle could be:
 This is not an implementation of the [Lotka–Volterra equations](https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations): evolution pushes some groups of cells to become predators and other to become prey, but only for short times. Discendants of preys could become predators within a few generations and vice versa. 
 On the other hand, it would be fascinating to see if the oscillating patterns of predator and prey species would fit well with the Lotka-Volterra model.
 ## Development
-Currently the development is at 0%. The goal is to write this with Rust, to get acquainted with the language, which fits well with the scope of a simulator.
-### Future Steps
-* Write a basic simulator: 
+Currently the development is at the early stages. The goal is to write the whole program with Rust, to get acquainted with the language, which fits well with the scope of a simulator.
+### Steps
+- [x] Write a basic simulator: 
     * All cells are in the same area, interactions are computationally expensive but it should be enough to recreate the desired dynamics.
     * Use a minimal set of mutating parameters: two pairs of complementary parameters should do.
     * Implement a minimal GUI to see the behaviours at runtime.
-* Write a data visualization tool: 
+- [ ] Implement a WASM-Based interface:
+    * Learn how to use web-based tools and GUI
+    * Reproduce more or less the same results of the desktop GUI
+- [ ] First optimization run:
+    * Rough profiling, performance tests, simple code improvements.
+- [ ] Write a data visualization tool: 
     * The history of the cells should be visible over time.
     * This allows to better fine-tune the environment with feedbacks and iteration.
-* Optimize the simulator: 
+- [ ] Optimize the simulator: 
     * Dividing the cells in multiple areas reduces the n^2 computational cost of the interactions check.
     * Use some fancy Rust optimization tools!
-* Analyze the gradient in the parameters space:
+- [ ] Analyze the gradient in the parameters space:
     * By saving extra information about a few previous generation of cells it is possible to obtain a "general direction" from each point of the parameter space: given all the offspring originated from one cell, tracking the number of alive ones (and successive grandkids) and how their parameters changed could give *for each parameter* a rough indication of where the evolutive pressure was pushing to.
