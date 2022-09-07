@@ -1,6 +1,5 @@
 mod cell;
-use cell::cell::Cell;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 
 use std::env;
 
@@ -22,8 +21,7 @@ fn main() {
         for _ in 0..1000 { 
         dish.simulation_step();
         }
-        println!("There are {} bacters and {} algae.", dish.bacters.len(), dish.algae.len());
+        println!("Iteration {}: there are {} bacters and {} algae.", dish.get_iteration(), dish.bacters.len(), dish.algae.len());
     }
     println!("Test run executed in {:?}", start.elapsed());
-
 }
