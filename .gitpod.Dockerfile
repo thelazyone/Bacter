@@ -1,3 +1,5 @@
 FROM gitpod/workspace-full
 
-RUN bash -cl "rustup toolchain install stable && rustup target add wasm32-unknown-unknown"
+    # Set up wasm-pack and wasm32-unknown-unknown for rustpython_wasm
+RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
+    rustup target add wasm32-unknown-unknown
