@@ -3,7 +3,7 @@ use std::time::{Instant};
 use std::env;
 
 // WASM Stuff:
-mod wasm_utils;
+mod wasm_utilities;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -17,7 +17,7 @@ extern {
     fn alert(s: &str);
 }
 
-// Clearly temporary.
+// Clearly temporary. TBR TODO
 #[wasm_bindgen]
 pub fn greet() {
     alert("Hello, {{project-name}}!");
