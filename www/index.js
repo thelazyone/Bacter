@@ -1,3 +1,3 @@
-import * as wasm from "bacter_rust";
+import * as wasm from "hello-wasm-pack";
 
 wasm.greet();

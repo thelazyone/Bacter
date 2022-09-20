@@ -4,4 +4,5 @@
 
 tasks:
   - init: cargo build
-    command: cargo watch -x run
+    command: cd www && npm install && npm run start
+   # command: cargo watch -x run
