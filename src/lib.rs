@@ -20,7 +20,7 @@ extern {
 // Clearly temporary. TBR TODO
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello, {{project-name}}!");
+    alert("Hello, bacter_rust!");
 }
 
 // Starting an async model that is NOT linked to any GUI environment. Then, accessing the information

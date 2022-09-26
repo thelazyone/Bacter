@@ -9,6 +9,8 @@
 # and then creating the www folder:
 #   npm init wasm-app www
 
+# For every change, you gotta build with wasm-pack build!
+
 tasks:
   - init: cargo build
     command: rustup target add wasm32-unknown-unknown && cargo install wasm-bindgen-cli && cd www && npm install && npm run start
