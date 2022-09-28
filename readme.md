@@ -60,9 +60,10 @@ Currently the development is at the early stages. The goal is to write the whole
     * All cells are in the same area, interactions are computationally expensive but it should be enough to recreate the desired dynamics.
     * Use a minimal set of mutating parameters: two pairs of complementary parameters should do.
     * Implement a minimal GUI to see the behaviours at runtime.
-- [ ] Implement a WASM-Based interface:
+- [X] Implement a WASM-Based interface:
     * Learn how to use web-based tools and GUI
     * Reproduce more or less the same results of the desktop GUI
+- [ ] Make a fancy JS plotting visualization.
 - [ ] First optimization run:
     * Rough profiling, performance tests, simple code improvements.
 - [ ] Write a data visualization tool: 
