@@ -13,7 +13,11 @@
 
 tasks:
   - init: cargo build
-    command: rustup target add wasm32-unknown-unknown && cargo install wasm-bindgen-cli && cd www && npm install && npm run start
-   # command: cargo watch -x run
+    command: rustup target add wasm32-unknown-unknown && \ 
+      cargo install wasm-bindgen-cli && \
+      curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
+      wasm-pack build && \
+      cd www && npm install && npm run start
+
 
 
