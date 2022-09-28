@@ -2,32 +2,21 @@
 # Please adjust to your needs (see https://www.gitpod.io/docs/config-gitpod-file)
 # and commit this file to your remote git repository to share the goodness with others.
 
-## To install npm and wasm-pack: 
-#   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-# then call
-#   wasm-pack build
-# and then creating the www folder:
-#   npm init wasm-app www
-
-# For every change, you gotta build with wasm-pack build!
-
 tasks:
-  - name: Installing wasm-bindgen
+  # The setup performs multiple tasks: 
+  # - Installing wasm-bindgen
+  # - Installing wasm-pack
+  # - Building the current code with wasm-pack
+  # - Set-up NPM and start it
+  - name:  Setting up... well, everything. 
     command: | 
       rustup target add wasm32-unknown-unknown
       cargo install wasm-bindgen-cli 
-    
-  - name: Installing wasm-pack
-    command: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-  - name: Building the current code.
-    command: wasm-pack build
-
-  - name: Set-up NPM
-    command: |
+      curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      wasm-pack build
       cd www
       npm install
       npm run start
 
-
+# For every change, you gotta build with wasm-pack build!
 
