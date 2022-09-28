@@ -13,14 +13,44 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
-    fn alert(s: &str);
+pub struct Statistics {
+    iterations: u32,
+    bactersNumber: u32,
+    algaeNumber: u32,
 }
 
-// Clearly temporary. TBR TODO
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, bacter_rust!");
+pub struct Petri {
+    statistics: Statistics,
+    dish: cell::dish::Dish,
+}
+
+use std::fmt;
+impl fmt::Display for Petri{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "iteration {}: {} cells, {} algae.", 
+            self.statistics.iterations, 
+            self.statistics.bactersNumber, 
+            self.statistics.algaeNumber)
+    }
+}
+
+#[wasm_bindgen]
+impl Petri{
+    pub fn new() -> Petri {
+        Petri{
+            dish:cell::dish::Dish::new(cell::cell::Float2D{x: 500  as f64* 2., y: 500 as f64* 2.}, 100),
+            statistics: Statistics{iterations: 0, bactersNumber: 0, algaeNumber: 0}}
+    }
+
+    pub fn tick(&mut self) {
+        self.dish.simulation_step();
+        self.statistics.iterations += 1;
+    }
+
+    pub fn get_stats(&self) -> String {
+        self.to_string()
+    }
 }
 
 // Starting an async model that is NOT linked to any GUI environment. Then, accessing the information

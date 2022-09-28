@@ -1,3 +1,13 @@
-import * as wasm from "bacter_rust";
+import { Petri } from "bacter_rust";
 
-wasm.greet();
+const pre = document.getElementById("stats_canvas");
+const universe = Petri.new();
+
+const renderLoop = () => {
+    pre.textContent = universe.get_stats();
+    universe.tick();
+  
+    requestAnimationFrame(renderLoop);
+  };
+
+  requestAnimationFrame(renderLoop)
