@@ -12,8 +12,7 @@
 # For every change, you gotta build with wasm-pack build!
 
 tasks:
-  - init: cargo build
-    command: rustup target add wasm32-unknown-unknown && \ 
+  - init: rustup target add wasm32-unknown-unknown && \ 
       cargo install wasm-bindgen-cli && \
       curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
       wasm-pack build && \
