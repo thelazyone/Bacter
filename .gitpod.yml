@@ -12,11 +12,22 @@
 # For every change, you gotta build with wasm-pack build!
 
 tasks:
-  - init: rustup target add wasm32-unknown-unknown && \ 
-      cargo install wasm-bindgen-cli && \
-      curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
-      wasm-pack build && \
-      cd www && npm install && npm run start
+  - name: Installing wasm-bindgen
+    command: | 
+      rustup target add wasm32-unknown-unknown
+      cargo install wasm-bindgen-cli 
+    
+  - name: Installing wasm-pack
+    command: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+  - name: Building the current code.
+    command: wasm-pack build
+
+  - name: Set-up NPM
+    command: |
+      cd www
+      npm install
+      npm run start
 
 
 
