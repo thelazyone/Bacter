@@ -21,4 +21,3 @@ tasks:
       npm run start
 
 # For every change, you gotta build with wasm-pack build!
-
