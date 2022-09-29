@@ -55,6 +55,7 @@ This is not an implementation of the [Lotka–Volterra equations](https://en.wik
 On the other hand, it would be fascinating to see if the oscillating patterns of predator and prey species would fit well with the Lotka-Volterra model.
 ## Development
 Currently the development is at the early stages. The goal is to write the whole program with Rust, to get acquainted with the language, which fits well with the scope of a simulator.
+
 ### Steps
 - [x] Write a basic simulator: 
     * All cells are in the same area, interactions are computationally expensive but it should be enough to recreate the desired dynamics.
@@ -63,7 +64,9 @@ Currently the development is at the early stages. The goal is to write the whole
 - [X] Implement a WASM-Based interface:
     * Learn how to use web-based tools and GUI
     * Reproduce more or less the same results of the desktop GUI
-- [ ] Make a fancy JS plotting visualization.
+- [X] Make a fancy JS plotting visualization.
+- [ ] Fine-Tune the simulation rules:
+    * If the species evolve pushing towards the boundaries of the parameters space then it means that the rules are to be improved. Ideally "extreme" adaptations should always be discouraged by the way the universe works, where a repulsion from the center of the space is due to competition with other cells.
 - [ ] First optimization run:
     * Rough profiling, performance tests, simple code improvements.
 - [ ] Write a data visualization tool: 
