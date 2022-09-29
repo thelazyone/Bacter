@@ -1,6 +1,4 @@
 mod cell;
-use std::time::{Instant};
-use std::env;
 
 // WASM Stuff:
 mod wasm_utilities;
@@ -12,6 +10,14 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+// Linear data struct for WASM. It has the lifetime of the Petri object
+// so it remains reserved.
+pub struct WasmLinearDataStruct {
+    pub aggros_vec: Vec<f32>,
+    pub sizes_vec: Vec<f32>,
+}
+
+// Low-effort stats for the simulation
 #[wasm_bindgen]
 pub struct Statistics {
     iterations: u32,
@@ -19,10 +25,12 @@ pub struct Statistics {
     algae_number: u32,
 }
 
+// Entry point for the simulator. The Petri dish is where all the action occurrs
 #[wasm_bindgen]
 pub struct Petri {
     statistics: Statistics,
     dish: cell::dish::Dish,
+    params: WasmLinearDataStruct,
 }
 
 use std::fmt;
@@ -35,14 +43,20 @@ impl fmt::Display for Petri{
     }
 }
 
+// Public methods to be binded into WASM
 #[wasm_bindgen]
 impl Petri{
+
+    // Default Constructor
     pub fn new() -> Petri {
         Petri{
             dish:cell::dish::Dish::new(cell::cell::Float2D{x: 500  as f64* 2., y: 500 as f64* 2.}, 100),
-            statistics: Statistics{iterations: 0, bacters_number: 0, algae_number: 0}}
+            statistics: Statistics{iterations: 0, bacters_number: 0, algae_number: 0},
+            params: WasmLinearDataStruct{aggros_vec: vec![0.], sizes_vec: vec![0.]}}
     }
 
+    // Pushes the simulation forward.
+    // Right now each steps are 1000 ticks, should do parametric
     pub fn tick(&mut self) {
         for _ in 0..1000 { 
         self.dish.simulation_step();
@@ -52,6 +66,7 @@ impl Petri{
         }
     }
 
+    // Get methods for basic statistics.
     pub fn get_stats_string(&self) -> String {
         self.to_string()
     }
@@ -67,27 +82,25 @@ impl Petri{
     pub fn get_algae_number(&self) -> u32{
         self.dish.algae.len() as u32
     }
-}
 
-// Starting an async model that is NOT linked to any GUI environment. Then, accessing the information
-// from the interface asynchronously.
-fn main() {
-    // This gives a stack trace when the binary hits an error
-    env::set_var("RUST_BACKTRACE", "1");
+    // Filling the WASM-dedicated linear vectors with floats, and exposing the pointer.
+    // As long as the software is synchronous this should be safe as is.
 
-    // Starting a new petri dish.
-    // TODO - remove the magic numbers, of course.
-    let mut dish = cell::dish::Dish::new(
-            cell::cell::Float2D{x: 500  as f64* 2., y: 500 as f64* 2.},
-            100);
-
-    // Temp - for now iterating and outputting some info.
-    let start = Instant::now();
-    for _ in 0..100 { 
-        for _ in 0..1000 { 
-        dish.simulation_step();
+    // Aggros linear vector
+    pub fn get_all_bacters_aggros(&mut self) -> *const f32{
+        self.params.aggros_vec.resize(self.dish.bacters.len(), 0.);
+        for i in 0..self.dish.bacters.len(){
+            self.params.aggros_vec[i] = self.dish.bacters[i].get_aggro();
         }
-        println!("Iteration {}: there are {} bacters and {} algae.", dish.get_iteration(), dish.bacters.len(), dish.algae.len());
+        self.params.aggros_vec.as_ptr()
     }
-    println!("Test run executed in {:?}", start.elapsed());
+
+    // Sizes linear vector
+    pub fn get_all_bacters_sizes(&mut self) -> *const f32{
+        self.params.sizes_vec.resize(self.dish.bacters.len(), 0.);
+        for i in 0..self.dish.bacters.len(){
+            self.params.sizes_vec[i] = self.dish.bacters[i].get_size();
+        }
+        self.params.sizes_vec.as_ptr()
+    }
 }

@@ -280,7 +280,7 @@ impl Bacter {
     }
 
     // Get Parameters: size
-    pub fn _get_aggro(&self) -> f32{
+    pub fn get_aggro(&self) -> f32{
         self.aggro
     }
 
