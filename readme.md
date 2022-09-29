@@ -54,8 +54,7 @@ An expected cycle could be:
 This is not an implementation of the [Lotka–Volterra equations](https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations): evolution pushes some groups of cells to become predators and other to become prey, but only for short times. Discendants of preys could become predators within a few generations and vice versa. 
 On the other hand, it would be fascinating to see if the oscillating patterns of predator and prey species would fit well with the Lotka-Volterra model.
 ## Development
-Currently the development is at the early stages. The goal is to write the whole program with Rust, to get acquainted with the language, which fits well with the scope of a simulator.
-
+Currently the development is at the early stages. The goal is to write the whole program with Rust, to get acquainted with the language, which fits well with the scope of a simulator. The repository has a Gitpod .yml file that sets up the WASM compiler and an NPM instance that starts when creating the workspace.
 ### Steps
 - [x] Write a basic simulator: 
     * All cells are in the same area, interactions are computationally expensive but it should be enough to recreate the desired dynamics.
