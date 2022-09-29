@@ -44,16 +44,28 @@ impl Petri{
     }
 
     pub fn tick(&mut self) {
-        for _ in 0..100 { 
+        for _ in 0..1000 { 
         self.dish.simulation_step();
         self.statistics.iterations = self.dish.get_iteration() as u32;
         self.statistics.bacters_number = self.dish.bacters.len() as u32;
         self.statistics.algae_number = self.dish.algae.len() as u32;
-            }
+        }
     }
 
-    pub fn get_stats(&self) -> String {
+    pub fn get_stats_string(&self) -> String {
         self.to_string()
+    }
+
+    pub fn get_iteration(&self) -> u32{
+        self.dish.get_iteration() as u32
+    }
+    
+    pub fn get_bacters_number(&self) -> u32{
+       self.dish.bacters.len() as u32
+    }
+    
+    pub fn get_algae_number(&self) -> u32{
+        self.dish.algae.len() as u32
     }
 }
 
