@@ -32,10 +32,8 @@ var params_distribution_options = {
 
 
 function drawChart() {
-  // Preparing the general statistics
   let bacters_number = universe.get_bacters_number();
   let algae_number = universe.get_algae_number();
-  population_data.push([universe.get_iteration(),bacters_number, algae_number]); 
 
   // Reading the linear memory for size and aggro:
   const aggros_ptr = universe.get_all_bacters_aggros();
@@ -64,8 +62,12 @@ const renderLoop = () => {
   // Ticking the universe:
   universe.tick();
 
-  // Writing statistics and updating the graph:
+  // Writing statistics as string
   pre.textContent = universe.get_stats_string();
+
+  // the populations growth plot needs an update at every tick (unregarding to the refresh rate)
+ 
+  population_data.push([universe.get_iteration(),universe.get_bacters_number(), universe.get_algae_number()]); 
 
   // looping, as always.
   requestAnimationFrame(renderLoop);
