@@ -2,6 +2,11 @@
 # Please adjust to your needs (see https://www.gitpod.io/docs/config-gitpod-file)
 # and commit this file to your remote git repository to share the goodness with others.
 
+# Calling the docker file instead of initializing stuff here.
+image: 
+  file: .gitpod.Dockerfile
+
+
 tasks:
   # The setup performs multiple tasks: 
   # - Installing wasm-bindgen
@@ -9,10 +14,10 @@ tasks:
   # - Building the current code with wasm-pack
   # - Set-up NPM and start it
   - name:  Setting up... well, everything. 
-    init: |
-      rustup target add wasm32-unknown-unknown
-      cargo install wasm-bindgen-cli 
-      curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    # init: |
+    #   rustup target add wasm32-unknown-unknown
+    #   cargo install wasm-bindgen-cli 
+    #   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     command: | 
       wasm-pack build
