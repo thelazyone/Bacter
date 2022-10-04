@@ -1,6 +1,11 @@
 use std::ops::Add;
 use rand::Rng;
 
+// Constants:
+const MIN_BACTER_SIZE: f32 = 0.2;
+const MAX_BACTER_SIZE: f32 = 1.0;
+
+
 // POINTS in 2D
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Float2D{
@@ -150,7 +155,7 @@ pub struct Bacter{
 impl Bacter {
     pub fn new_random(area_size : Float2D, index: i64) -> Bacter{
         let mut rng = rand::thread_rng();
-        let temp_size = rng.gen::<f32>();
+        let temp_size = rng.gen::<f32>().clamp(MIN_BACTER_SIZE, MAX_BACTER_SIZE);
         let temp_aggro = rng.gen::<f32>();
         Bacter{
             bacter_vector : Vector2D{
@@ -264,7 +269,7 @@ impl Bacter {
                         y: self.get_size()  as f64*2. * -10.1 * versor.y,}),
                 self.bacter_vector.vel.multiply(-1.),
                 0, 
-                (self.size + (rng.gen::<f32>() - 0.5) * 0.05).clamp(0.2, 1.0), // MAGIC NUMBER
+                (self.size + (rng.gen::<f32>() - 0.5) * 0.05).clamp(MIN_BACTER_SIZE, MAX_BACTER_SIZE), // MAGIC NUMBER
                 (self.aggro + (rng.gen::<f32>() - 0.5) * 0.05).clamp(0.0, 1.0)); // MAGIC NUMBER
 
             self.food_value = self.food_value / 2.;

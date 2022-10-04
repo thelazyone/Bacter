@@ -25,8 +25,8 @@ var population_options = {
 var params_distribution_data = [['Aggressivity', 'Size']]; 
 var params_distribution_options = {
       title: 'Aggressivity vs. Size projection',
-      hAxis: {title: 'Aggressivity', minValue: -100, maxValue: 100},
-      vAxis: {title: 'projection', minValue: -100, maxValue: 100},
+      hAxis: {title: 'Aggressivity', minValue: 0., maxValue: 1.},
+      vAxis: {title: 'Size', minValue: 0.2, maxValue: 1.},
       legend: 'none'
     };
 
@@ -45,7 +45,7 @@ function drawChart() {
   // TODO - there must be a way to memcpy it or even reference?
   params_distribution_data = [['Aggressivity', 'Size']]; 
   for (let i = 0; i < bacters_number; i++) {
-    params_distribution_data.push([aggros[i] * 200 - 100. , sizes[i] * 200 - 100]); 
+    params_distribution_data.push([aggros[i] , sizes[i]]); 
   }
 
   // Drawing the populations plot:
