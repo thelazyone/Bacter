@@ -1,4 +1,5 @@
 mod cell;
+use crate::cell::cell::Cell; // for the Bacter Cell trait.
 
 // WASM Stuff:
 mod wasm_utilities;
@@ -15,6 +16,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub struct WasmLinearDataStruct {
     pub aggros_vec: Vec<f32>,
     pub sizes_vec: Vec<f32>,
+    pub bacters_positions_vec: Vec<f32>,
+    pub algae_positions_vec: Vec<f32>,
 }
 
 // Low-effort stats for the simulation
@@ -52,13 +55,17 @@ impl Petri{
         Petri{
             dish:cell::dish::Dish::new(cell::cell::Float2D{x: 500  as f64* 2., y: 500 as f64* 2.}, 100),
             statistics: Statistics{iterations: 0, bacters_number: 0, algae_number: 0},
-            params: WasmLinearDataStruct{aggros_vec: vec![0.], sizes_vec: vec![0.]}}
+            params: WasmLinearDataStruct{
+                aggros_vec: vec![0.], 
+                sizes_vec: vec![0.],
+                bacters_positions_vec: vec![0.],
+                algae_positions_vec: vec![0.]}}
     }
 
     // Pushes the simulation forward.
     // Right now each steps are 1000 ticks, should do parametric
-    pub fn tick(&mut self) {
-        for _ in 0..1000 { 
+    pub fn tick(&mut self, steps: u32) {
+        for _ in 0..steps { 
         self.dish.simulation_step();
         self.statistics.iterations = self.dish.get_iteration() as u32;
         self.statistics.bacters_number = self.dish.bacters.len() as u32;
@@ -103,4 +110,25 @@ impl Petri{
         }
         self.params.sizes_vec.as_ptr()
     }
+
+    // Positions (interlaced x-y) linear vector
+    pub fn get_all_bacters_position_interlaced(&mut self) -> *const f32{
+        self.params.bacters_positions_vec.resize(self.dish.bacters.len()*2, 0.);
+        for i in 0..self.dish.bacters.len(){
+            self.params.bacters_positions_vec[i*2] = self.dish.bacters[i].get_vector().pos.x as f32;
+            self.params.bacters_positions_vec[i*2 + 1] = self.dish.bacters[i].get_vector().pos.y as f32;
+        }
+        self.params.bacters_positions_vec.as_ptr()
+    }
+
+    // Positions (interlaced x-y) linear vector
+    pub fn get_all_algae_position_interlaced(&mut self) -> *const f32{
+        self.params.algae_positions_vec.resize(self.dish.algae.len()*2, 0.);
+        for i in 0..self.dish.algae.len(){
+            self.params.algae_positions_vec[i*2] = self.dish.algae[i].get_vector().pos.x as f32;
+            self.params.algae_positions_vec[i*2 + 1] = self.dish.algae[i].get_vector().pos.y as f32;
+        }
+        self.params.algae_positions_vec.as_ptr()
+    }
+
 }

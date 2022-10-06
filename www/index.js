@@ -59,15 +59,52 @@ function drawChart() {
 
 // Generic looping render.
 const renderLoop = () => {
-  // Ticking the universe:
-  universe.tick();
 
-  // Writing statistics as string
-  pre.textContent = universe.get_stats_string();
+  // Now, depending wether the "SLOW" button is pressed, the 
+  // simulation proceeds by one tick or by 1000.
 
-  // the populations growth plot needs an update at every tick (unregarding to the refresh rate)
- 
-  population_data.push([universe.get_iteration(),universe.get_bacters_number(), universe.get_algae_number()]); 
+  if(document.getElementById('slow_button').checked == true)
+  {
+    // Ticking by one iteration:
+    universe.tick(1);
+
+    // Writing statistics as string
+    pre.textContent = universe.get_stats_string();
+
+    // Reading the linear memory for size and aggro:
+    let bacters_number = universe.get_bacters_number();
+    let algae_number = universe.get_algae_number();
+    const aggros_ptr = universe.get_all_bacters_aggros();
+    const aggros = new Float32Array(memory.buffer, aggros_ptr, bacters_number);
+    const sizes_ptr = universe.get_all_bacters_sizes();
+    const sizes = new Float32Array(memory.buffer, sizes_ptr, bacters_number);
+    const positions_ptr = universe.get_all_bacters_position_interlaced();
+    const positions = new Float32Array(memory.buffer, positions_ptr, bacters_number * 2);
+    const algae_ptr = universe.get_all_algae_position_interlaced();
+    const algae = new Float32Array(memory.buffer, algae_ptr, algae_number * 2);
+
+    // Filling the canvas:
+    var canvas = document.getElementById('petri_canvas');
+    let ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < bacters_number; i++) {
+      drawCircle(ctx, positions[2*i], positions[2*i + 1], sizes[i] * 10., 'black', '', 2)
+    }
+    for (let i = 0; i < algae_number; i++) {
+      drawCircle(ctx, algae[2*i], algae[2*i + 1], 1., 'green', '', 2)
+    }
+  }
+  else
+  {
+    // Ticking the universe for a thousands iterations: 
+    universe.tick(1000);
+
+    // Writing statistics as string
+    pre.textContent = universe.get_stats_string();
+
+    // the populations growth plot needs an update at every tick (unregarding to the refresh rate)
+    population_data.push([universe.get_iteration(),universe.get_bacters_number(), universe.get_algae_number()]); 
+  }
 
   // looping, as always.
   requestAnimationFrame(renderLoop);
@@ -78,3 +115,20 @@ var intervalId = setInterval(function() { google.charts.setOnLoadCallback(drawCh
 
 // Calling this once, it enters into an infinite loop.
 requestAnimationFrame(renderLoop)
+
+
+// CANVAS CIRCLES DRAWING:
+// Taken from https://stackoverflow.com/questions/25095548/how-to-draw-a-circle-in-html5-canvas-using-javascript
+function drawCircle(ctx, x, y, radius, fill, stroke, strokeWidth) {
+  ctx.beginPath()
+  ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
+  if (fill) {
+    ctx.fillStyle = fill
+    ctx.fill()
+  }
+  if (stroke) {
+    ctx.lineWidth = strokeWidth
+    ctx.strokeStyle = stroke
+    ctx.stroke()
+  }
+}

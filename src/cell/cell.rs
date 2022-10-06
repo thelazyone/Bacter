@@ -7,6 +7,7 @@ const MAX_BACTER_SIZE: f32 = 1.0;
 
 
 // POINTS in 2D
+// TODO make it into f32, no points in using that precision!
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Float2D{
     pub x : f64,
