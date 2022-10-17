@@ -5,6 +5,7 @@ import { memory } from "bacter_rust/bacter_rust_bg";
 
 const pre = document.getElementById("stats_canvas"); 
 const universe = Petri.new();
+var averageTickTime = 0.
 
 // Preparing the chart:
 google.charts.load('current', {
@@ -97,10 +98,15 @@ const renderLoop = () => {
   else
   {
     // Ticking the universe for a thousands iterations: 
+    var startTime = new Date();
     universe.tick(1000);
+    var endTime = new Date();
+    var diffTime = endTime - startTime;
+    averageTickTime = averageTickTime * 0.9 + diffTime;
 
     // Writing statistics as string
-    pre.textContent = universe.get_stats_string();
+    var tmpString = (averageTickTime / 10).toString()
+    pre.textContent = universe.get_stats_string() + " avg elapsed: " + tmpString + " ms.";
 
     // the populations growth plot needs an update at every tick (unregarding to the refresh rate)
     population_data.push([universe.get_iteration(),universe.get_bacters_number(), universe.get_algae_number()]); 
