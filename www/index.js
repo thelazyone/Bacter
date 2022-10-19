@@ -21,6 +21,13 @@ var population_options = {
       legend: { position: 'bottom' }
     };
 
+// Performances Chart
+var performances_data = [['iteration', 'mm']];
+var performances_options = {
+  title: 'Performances: ms per 1000 steps',
+  curveType: 'none',
+  legend: { position: 'bottom' }
+};
 
 // Parameters Distribution Chart variables
 var params_distribution_data = [['Aggressivity', 'Size']]; 
@@ -52,6 +59,10 @@ function drawChart() {
   // Drawing the populations plot:
   var population_chart = new google.visualization.LineChart(document.getElementById('data_chart'));
   population_chart.draw(google.visualization.arrayToDataTable(population_data), population_options);
+
+  // Drawing the performances plot:
+  var performances_chart = new google.visualization.LineChart(document.getElementById('performances_chart'));
+  performances_chart.draw(google.visualization.arrayToDataTable(performances_data), performances_options);
 
   // Drawing the last-iteration parameters space:
   var params_distribution_chart = new google.visualization.ScatterChart(document.getElementById('params_chart'));
@@ -110,6 +121,9 @@ const renderLoop = () => {
 
     // the populations growth plot needs an update at every tick (unregarding to the refresh rate)
     population_data.push([universe.get_iteration(),universe.get_bacters_number(), universe.get_algae_number()]); 
+
+    performances_data.push([universe.get_iteration(), averageTickTime / 10]); 
+    // console.log(population_data.length);
   }
 
   // looping, as always.
