@@ -1,9 +1,9 @@
 var cacheName = 'egui-template-pwa';
 var filesToCache = [
-  './',
-  './index.html',
-  './bacter_rust.js',
-  './bacter_rust_bg.wasm',
+  // './',
+  // './index.html',
+  // './bacter_rust.js',
+  // './bacter_rust_bg.wasm',
 ];
 
 /* Start the service worker and cache all of the app's content */
