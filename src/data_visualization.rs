@@ -6,28 +6,20 @@ use egui::plot::{Line, PlotPoint, PlotPoints};
 pub struct DataVisualization {
 
     // First test plot: populations
-    iteration : Vec<u32>,
-    bacters_population : Vec<u32>,
-    algae_population : Vec<u32>,
+    pub iteration : Vec<u32>,
+    pub bacters_population : Vec<u32>,
+    pub algae_population : Vec<u32>,
 }
 
 // Public plotting functions
  
 impl DataVisualization{
     pub fn default() -> Self{
-        let mut temp = DataVisualization{
+        DataVisualization{
             iteration : Vec::<u32>::new(),
             bacters_population : Vec::<u32>::new(),
             algae_population : Vec::<u32>::new(),
-        };
-
-        temp.iteration.push(30);
-        temp.iteration.push(60);
-        temp.iteration.push(100);
-        temp.bacters_population.push(300);
-        temp.bacters_population.push(350);
-        temp.bacters_population.push(340);
-        temp
+        }
     }
 
     pub fn population_plot(& self, ui: &mut egui::Ui) -> egui::Response {

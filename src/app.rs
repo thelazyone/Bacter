@@ -1,5 +1,10 @@
-use core::cell::Cell; // for the Bacter Cell trait.
-mod data_visualization;   
+use std::time::Duration;
+
+use super::cell::cell::Cell as bacter_cell; // for the Bacter Cell trait.
+use super::cell::cell::Float2D as bacter_float2D; // for the Bacter Cell trait.
+use super::cell::dish::Dish as bacter_dish; // for the Bacter Cell trait.
+use crate::data_visualization::DataVisualization;
+
  
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -7,25 +12,34 @@ mod data_visualization;
 pub struct TemplateApp {
     // Creating the Universe as a Petri Dish.
     // Skipping the serialization (since it's fairly heavy). Might re-enable in the future.
-    #[serde(skip)]
-    // TODO
 
-    // Plots Data
-    simulation_data : data_visualization::DataVisualization,
+    // Petri Dish and the model
+    #[serde(skip)]
+    dish: bacter_dish,
+    #[serde(skip)]
+    simulation_data : DataVisualization,
+    is_simulation_running : bool,
 
     // Parameters for the simulation
     petri_size : u32, // Default is 500 px
     algae_growth_ratio: f32,
+
+    // Debugging message:
+    last_message : String
 }
 
 impl Default for TemplateApp {
     fn default() -> Self {
         Self {
-            simulation_data : data_visualization::DataVisualization::default(),
+            dish : bacter_dish::new(bacter_float2D{x: 0  as f64, y: 0 as f64}, 0),
+            simulation_data : DataVisualization::default(),
+            is_simulation_running : false,
 
-            // Example stuff:
+            // Default fields:
             petri_size : 500,
             algae_growth_ratio : 1.,
+
+            last_message: "".to_owned(),
         }
     }
 }
@@ -42,6 +56,7 @@ impl TemplateApp {
             return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
         }
 
+        // If no previous state has been found, creating a default one.
         Default::default()
     }
 }
@@ -56,14 +71,42 @@ impl eframe::App for TemplateApp {
     /// Put your widgets into a `SidePanel`, `TopPanel`, `CentralPanel`, `Window` or `Area`.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let Self { 
+            dish,
             simulation_data, 
+            is_simulation_running,
             petri_size, 
-            algae_growth_ratio } = self;
+            algae_growth_ratio,
+            last_message } = self;
 
         // Examples of how to create different panels and windows.
         // Pick whichever suits you.
         // Tip: a good default choice is to just keep the `CentralPanel`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
+
+        // Updating the plot info
+        if let Some(last_iteration) = self.simulation_data.iteration.last().copied(){
+            if self.dish.get_iteration() > last_iteration as i32{
+
+
+                self.simulation_data.iteration.push(self.dish.get_iteration() as u32);
+                self.simulation_data.bacters_population.push(self.dish.bacters.len() as u32);
+                self.simulation_data.algae_population.push(self.dish.algae.len() as u32);
+
+                self.last_message = 
+                    format!("Adding Iteration {}, vect size {}",
+                        self.dish.get_iteration(),
+                        self.simulation_data.iteration.len()
+                        ).to_owned();
+            }
+        }
+        else{
+
+            self.simulation_data.iteration.push(self.dish.get_iteration() as u32);
+            self.simulation_data.bacters_population.push(self.dish.bacters.len() as u32);
+            self.simulation_data.algae_population.push(self.dish.algae.len() as u32);
+
+            self.last_message = format!("First Iteration!").to_owned();
+        }
 
         // This shows only when compiled for desktop app!
         #[cfg(not(target_arch = "wasm32"))] 
@@ -82,40 +125,53 @@ impl eframe::App for TemplateApp {
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Bacter");
 
-            // TODO TBR
-            //
-            // Edit field
-            // ui.horizontal(|ui| {
-            //     ui.label("Write something: ");
-            //     ui.text_edit_singleline(label);
-            // });
-            // 
-            // Slider
-            ui.add(egui::Slider::new(petri_size, 0..=1000).text("Simulation Size (side)"));
-            ui.add(egui::Slider::new(algae_growth_ratio, 0.0..=5.).text("Algae Growth"));
-
-            // // Parameters:
-            // ui.horizontal(|ui| {
-            //     ui.label("Simulation Size (side): ");
-            //     ui.text_edit_singleline(petri_size);
-            // });
-            // ui.horizontal(|ui| {
-            //     ui.label("Algae Growth: ");
-            //     ui.text_edit_singleline(algae_growth_ratio);
-            // });
-            
+            ui.add(egui::Slider::new(&mut self.petri_size, 0..=1000).text("Simulation Size (side)"));
+            ui.add(egui::Slider::new(&mut self.algae_growth_ratio, 0.0..=5.).text("Algae Growth"));            
 
             // Start Simulation Button
             if ui.button("Start Simulation").clicked() {
+                
+                // Updating the thing:
+                self.dish = bacter_dish::new(bacter_float2D{
+                    x: self.petri_size as f64,
+                    y: self.petri_size as f64},
+                    100);
+                
+                self.is_simulation_running = true;
+
+
+
                 // Starting the simulation async
+                // tokio::spawn(
+                //     Interval::new_interval(Duration::from_millis(500))
+                //     .for_each(|_| {
+                //         self.dish.tick(1);
+                //         Ok(())
+                //     })
+                //     .map_err(|_| ()),
+                // );
+
                 // TODO use SM commands or a polled flag
             }
 
-            // Start Simulation Button
+            // Step Simulation Button - TODO TBR!
+            if ui.button("Step Simulation").clicked() {
+
+                for _ in 0..100 { 
+
+                self.dish.simulation_step();
+                }
+            }
+
+            // Pause Simulation Button
             if ui.button("Pause Simulation").clicked() {
                 // Starting the simulation async
                 // TODO use SM commands or a polled flag
             }
+
+            // Debug Log:
+            ui.label(self.last_message.clone());
+
 
             // Keeping that because they deserve it.
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
@@ -134,17 +190,10 @@ impl eframe::App for TemplateApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
 
-            //ui.heading("eframe template");
-            // ui.hyperlink("https://github.com/emilk/eframe_template");
-            // ui.add(egui::github_link_file!(
-            //     "https://github.com/emilk/eframe_template/blob/master/",
-            //     "Source code."
-            // ));
-
+            // Populations plot
             egui::Window::new("Populations")
-                .resizable(false)
+                .resizable(true)
                 .collapsible(false)
                 .show(ctx, |ui| {
                     ui.label("Bacters and Algae population.");
@@ -155,3 +204,4 @@ impl eframe::App for TemplateApp {
         });
     }
 }
+
