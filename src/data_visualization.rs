@@ -30,10 +30,7 @@ impl DataVisualization{
             .to_owned();
 
         let bacters_line = Line::new(PlotPoints::from(bacters_points));
-        //let algae_line = Line::new(self.algae_population_vector);
         egui::plot::Plot::new("Population Plot")
-            .height(32.0)
-            .data_aspect(1.0)
             .show(ui, |plot_ui| plot_ui
                 .line(bacters_line)) // TODO find a way to do multiple lines
             .response

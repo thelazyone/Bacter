@@ -5,7 +5,7 @@ use super::cell::cell::Float2D as bacter_float2D; // for the Bacter Cell trait.
 use super::cell::dish::Dish as bacter_dish; // for the Bacter Cell trait.
 use crate::data_visualization::DataVisualization;
 
- 
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
