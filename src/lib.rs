@@ -68,7 +68,7 @@ impl Petri{
         for _ in 0..steps { 
         self.dish.simulation_step();
         self.statistics.iterations = self.dish.get_iteration() as u32;
-        self.statistics.bacters_number = self.dish.bacters.len() as u32;
+        self.statistics.bacters_number = self.dish.bacters_swap_A.len() as u32;
         self.statistics.algae_number = self.dish.algae.len() as u32;
         }
     }
@@ -81,9 +81,10 @@ impl Petri{
     pub fn get_iteration(&self) -> u32{
         self.dish.get_iteration() as u32
     }
-    
+
+    // TODO temp implementation, should be using the right one! (or maybe we'll use Swap)
     pub fn get_bacters_number(&self) -> u32{
-       self.dish.bacters.len() as u32
+       self.dish.bacters_swap_A.len() as u32
     }
     
     pub fn get_algae_number(&self) -> u32{
@@ -95,28 +96,28 @@ impl Petri{
 
     // Aggros linear vector
     pub fn get_all_bacters_aggros(&mut self) -> *const f32{
-        self.params.aggros_vec.resize(self.dish.bacters.len(), 0.);
-        for i in 0..self.dish.bacters.len(){
-            self.params.aggros_vec[i] = self.dish.bacters[i].get_aggro();
+        self.params.aggros_vec.resize(self.dish.bacters_swap_A.len(), 0.);
+        for i in 0..self.dish.bacters_swap_A.len(){
+            self.params.aggros_vec[i] = self.dish.bacters_swap_A[i].get_aggro();
         }
         self.params.aggros_vec.as_ptr()
     }
 
     // Sizes linear vector
     pub fn get_all_bacters_sizes(&mut self) -> *const f32{
-        self.params.sizes_vec.resize(self.dish.bacters.len(), 0.);
-        for i in 0..self.dish.bacters.len(){
-            self.params.sizes_vec[i] = self.dish.bacters[i].get_size();
+        self.params.sizes_vec.resize(self.dish.bacters_swap_A.len(), 0.);
+        for i in 0..self.dish.bacters_swap_A.len(){
+            self.params.sizes_vec[i] = self.dish.bacters_swap_A[i].get_size();
         }
         self.params.sizes_vec.as_ptr()
     }
 
     // Positions (interlaced x-y) linear vector
     pub fn get_all_bacters_position_interlaced(&mut self) -> *const f32{
-        self.params.bacters_positions_vec.resize(self.dish.bacters.len()*2, 0.);
-        for i in 0..self.dish.bacters.len(){
-            self.params.bacters_positions_vec[i*2] = self.dish.bacters[i].get_vector().pos.x as f32;
-            self.params.bacters_positions_vec[i*2 + 1] = self.dish.bacters[i].get_vector().pos.y as f32;
+        self.params.bacters_positions_vec.resize(self.dish.bacters_swap_A.len()*2, 0.);
+        for i in 0..self.dish.bacters_swap_A.len(){
+            self.params.bacters_positions_vec[i*2] = self.dish.bacters_swap_A[i].get_vector().pos.x as f32;
+            self.params.bacters_positions_vec[i*2 + 1] = self.dish.bacters_swap_A[i].get_vector().pos.y as f32;
         }
         self.params.bacters_positions_vec.as_ptr()
     }

@@ -184,7 +184,7 @@ impl Bacter {
             dead:false,}
     }
 
-    pub fn _set_vel(&mut self, vel: Float2D){      
+    pub fn _set_vel(&mut self, vel: Float2D){
         self.bacter_vector.vel = vel;
     }
     pub fn apply_movement(&mut self, time: f64){
@@ -223,8 +223,8 @@ impl Bacter {
         }
     }
 
-    pub fn bounce_with_cells<T>(&mut self, other_cells: &[T]) -> Option<usize>
-    where T: Cell{
+    pub fn bounce_with_cells<T>(&self, current_cell: &mut Bacter, other_cells: &[T]) -> Option<usize> where
+    T: Cell{
 
         let mut last_interaction_index: Option<usize> = None;
 
@@ -232,15 +232,17 @@ impl Bacter {
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
         for i in 0..other_cells.len(){
-            if other_cells[i].get_index() != self.index{
-                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
+            if other_cells[i].get_index() != current_cell.index{
+                let cells_distance: f64 = current_cell.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
                 let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
                 if  cells_distance > 0.1 && cells_distance < cells_impact_distance * cells_impact_distance {
 
                     // Reversing the speed:
                     // V = |V| * -ver(A-B) 
-                    self.bacter_vector.vel =
-                    self.bacter_vector.pos.versor(other_cells[i].get_vector().pos).multiply(self.bacter_vector.vel.abs());
+                    current_cell.bacter_vector.vel =
+                        current_cell.bacter_vector.pos
+                            .versor(other_cells[i].get_vector().pos)
+                            .multiply(current_cell.bacter_vector.vel.abs());
 
                     // updating the interacting index:
                     last_interaction_index = Some(i);
@@ -251,7 +253,7 @@ impl Bacter {
         last_interaction_index
     } 
 
-    pub fn try_reproducing(&mut self) -> Option<Bacter>{
+    pub fn try_reproducing(&mut self ) -> Option<Bacter>{
 
         if self.dead{
             return None;
@@ -310,9 +312,9 @@ impl Bacter {
         }
     }
 
-    pub fn try_kill_bacter(&mut self, other : Bacter) -> bool {
+    pub fn try_kill_bacter(&self, current_cell: &mut Bacter, other : Bacter) -> bool {
         
-        if self.dead || other.dead{
+        if current_cell.dead || other.dead{
             //println!("you can't kill what is already dead");
             return false;
         }
@@ -320,28 +322,28 @@ impl Bacter {
         // as a start, if rng > aggro, one tries to eat the other.
         // Note that the "victim" cannot fight back.
         let mut rng = rand::thread_rng();
-        if rng.gen::<f32>() < self.aggro{
+        if rng.gen::<f32>() < current_cell.aggro{
             // Adding a +- 0.5 chance to the size of the two.
-            if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
+            if current_cell.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
 
                 // the victim is killed, and the food transfered to capacity to the one eating.
-                self.food_value += other.food_value * 0.5; // TODO add a dampening factor?
+                current_cell.food_value += other.food_value * 0.5; // TODO add a dampening factor?
                 return true;
             }
         }
         false
     }
 
-    pub fn try_eat_alga(&mut self, other : Alga) -> bool {
-        if self.dead || other.dead {
+    pub fn try_eat_alga(&self, current_cell: &mut Bacter, other : Alga) -> bool {
+        if current_cell.dead || other.dead {
             //println!("you can't kill what is already dead");
             return false;
         }
 
         // Complementary to eating cells, the less the aggro the higher the chances to eat.
         let mut rng = rand::thread_rng();
-        if rng.gen::<f32>() > self.aggro{
-            self.food_value += other.food_value;
+        if rng.gen::<f32>() > current_cell.aggro{
+            current_cell.food_value += other.food_value;
             return true;
         }
 
