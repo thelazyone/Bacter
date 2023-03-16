@@ -4,7 +4,8 @@ import { memory } from "bacter_rust/bacter_rust_bg";
 // Creating the petri dish. The amount of bacters is 100 for a 500x500 dish
 const pre = document.getElementById("bacter_canvas");
 pre.width = window.innerWidth;
-pre.height = window.innerHeight;const total_bacters = 500 / (500*500) * pre.width * pre.height;
+pre.height = window.innerHeight;
+const total_bacters = 500 / (500*500) * pre.width * pre.height;
 const universe = Petri.new_with_params(pre.width, pre.height, total_bacters);
 console.warn(pre.width, pre.height, 100);
 
