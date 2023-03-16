@@ -1,62 +1,27 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Testing Bacter Rust</title>
-    <style>
-      body {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .container {
-        column-count: 2;
-      }
-      .columnLeft {
-        float: left;
-        width: 40%;
-      }
-      .columnRight{
-        float: right;
-        width: 60%;
-      }
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bacter - an evolution simulator</title><style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #bacter_canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
     </style>
-  </head>
-
-    <div class="container">
-      <p>
-        <body>
-          <pre id="stats_canvas"></pre>
-          <script src="./bootstrap.js"></script>
-        </body>
-        <input type="checkbox" id="slow_button" class="checkbox" />
-        <label for="slow_button" class="toggle"/>
-        <body>
-          <pre id="performances_chart"></pre>
-          <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        </body>
-        <body>
-          <pre id="data_chart"></pre>
-          <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        </body>
-        <body>
-          <pre id="params_chart"></pre>
-          <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        </body>
-      </p>
-    </div>
-    <div class="columnRight" >
-      <body>
-        <canvas id="petri_canvas" width="500" height="500"></canvas>
-      </body>
-    </div>
-
-
+</head>
+<body>
+  <canvas id="bacter_canvas"></canvas>
+  <script src="bootstrap.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <button style="position: absolute; top:20px; left:20px;" id="fast_btn">Toggle Fast Simulation</button>
+  <span style="position: absolute; top:50px; left:20px; color: white" id="stats"></span>
+  <span style="position: absolute; top:80px; left:20px; color: white" id="iteration"></span>
+</body>
 </html>
