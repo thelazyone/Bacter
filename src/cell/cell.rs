@@ -137,7 +137,7 @@ impl Alga {
 }
 
 // BACTER
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Bacter{
     bacter_vector : Vector2D,
     index : i64,
@@ -173,6 +173,17 @@ impl Bacter {
                 dead: false,}
     }
 
+    pub fn new_stub() -> Bacter {
+        Bacter{
+            bacter_vector : Vector2D{
+                pos: Float2D{x: 0., y: 0.}, vel: Float2D{x: 0., y: 0.}},
+            size: 0.,
+            aggro: 0.,
+            food_value: 50., // half-full belly.
+            index: 0,
+            dead:true,}
+    }
+
     pub fn new(pos : Float2D, vel : Float2D, index: i64, size: f32, aggro: f32) -> Bacter{
     Bacter{
             bacter_vector : Vector2D{
@@ -182,6 +193,16 @@ impl Bacter {
             food_value: 50. * size, // half-full belly.
             index: index,
             dead:false,}
+    }
+
+    // TODO I'm not sure why Copy was not derived above.
+    pub fn copy(&mut self, paragon: &Bacter) {
+        self.bacter_vector = paragon.bacter_vector;
+        self.index = paragon.index;
+        self.size = paragon.size;
+        self.aggro = paragon.aggro;
+        self.food_value = paragon.food_value;
+        self.dead = paragon.dead;
     }
 
     pub fn _set_vel(&mut self, vel: Float2D){
@@ -232,17 +253,17 @@ impl Bacter {
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
         for i in 0..other_cells.len(){
-            if other_cells[i].get_index() != current_cell.index{
-                let cells_distance: f64 = current_cell.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
+            if other_cells[i].get_index() != self.index{
+                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
                 let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
                 if  cells_distance > 0.1 && cells_distance < cells_impact_distance * cells_impact_distance {
 
                     // Reversing the speed:
                     // V = |V| * -ver(A-B) 
                     current_cell.bacter_vector.vel =
-                        current_cell.bacter_vector.pos
+                        self.bacter_vector.pos.clone()
                             .versor(other_cells[i].get_vector().pos)
-                            .multiply(current_cell.bacter_vector.vel.abs());
+                            .multiply(self.bacter_vector.vel.abs());
 
                     // updating the interacting index:
                     last_interaction_index = Some(i);
@@ -312,9 +333,9 @@ impl Bacter {
         }
     }
 
-    pub fn try_kill_bacter(&self, current_cell: &mut Bacter, other : Bacter) -> bool {
+    pub fn try_kill_bacter(&mut self, other : &Bacter) -> bool {
         
-        if current_cell.dead || other.dead{
+        if self.dead || other.dead{
             //println!("you can't kill what is already dead");
             return false;
         }
@@ -322,28 +343,28 @@ impl Bacter {
         // as a start, if rng > aggro, one tries to eat the other.
         // Note that the "victim" cannot fight back.
         let mut rng = rand::thread_rng();
-        if rng.gen::<f32>() < current_cell.aggro{
+        if rng.gen::<f32>() < self.aggro{
             // Adding a +- 0.5 chance to the size of the two.
-            if current_cell.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
+            if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
 
                 // the victim is killed, and the food transfered to capacity to the one eating.
-                current_cell.food_value += other.food_value * 0.5; // TODO add a dampening factor?
+                self.food_value += other.food_value * 0.5; // TODO add a dampening factor?
                 return true;
             }
         }
         false
     }
 
-    pub fn try_eat_alga(&self, current_cell: &mut Bacter, other : Alga) -> bool {
-        if current_cell.dead || other.dead {
+    pub fn try_eat_alga(& mut self, other : Alga) -> bool {
+        if self.dead || other.dead {
             //println!("you can't kill what is already dead");
             return false;
         }
 
         // Complementary to eating cells, the less the aggro the higher the chances to eat.
         let mut rng = rand::thread_rng();
-        if rng.gen::<f32>() > current_cell.aggro{
-            current_cell.food_value += other.food_value;
+        if rng.gen::<f32>() > self.aggro{
+            self.food_value += other.food_value;
             return true;
         }
 
