@@ -1,6 +1,8 @@
 use crate::cell::cell;
+//use crate::collision_grid::collision_grid;
 use rand::Rng;
-use crate::cell::cell::Bacter;
+use crate::cell::cell::{Bacter, Cell};
+use crate::collision_grid::collision_grid::CollisionGrid;
 
 
 // MAIN TODOS
@@ -17,7 +19,7 @@ pub enum SwapState {
 pub struct Dish {
 
     // Swapping logic for the buffers, to prevent unnecessary copying.
-    bacters_swap_a: Vec<Bacter>, // TODO consider making this private?
+    pub bacters_swap_a: Vec<Bacter>, // TODO consider making this private?
     bacters_swap_b: Vec<Bacter>,
     pub swap_counter : SwapState,
     pub algae: Vec<cell::Alga>,
@@ -28,11 +30,16 @@ pub struct Dish {
     _duration_counter: f64,
     cells_counter: i64,
     algae_counter: i64,
+
+    // Collision Grid
+    collision_grid : CollisionGrid,
+    collision_grid_algae : CollisionGrid,
 }
 
 
 impl Dish{
     pub fn new(i_bound_rect : cell::Float2D, i_cells_number : i64) -> Dish {
+        let mut grid_size = (50., 50.);
         let mut curr_model = Dish {
             bacters_swap_a: vec![],
             bacters_swap_b: vec![],
@@ -43,6 +50,14 @@ impl Dish{
             _duration_counter: 0.,
             cells_counter: 0,
             algae_counter: 0,
+            collision_grid: CollisionGrid::new(
+                grid_size,
+            (i_bound_rect.x as f32 , i_bound_rect.y as f32)
+            ),
+            collision_grid_algae: CollisionGrid::new(
+                grid_size,
+                (i_bound_rect.x as f32 , i_bound_rect.y as f32)
+            ),
         };
     
         for idx in 0..i_cells_number {
@@ -77,33 +92,45 @@ impl Dish{
             },
         }
 
-        // The cloning is necessary, even though the size is similar.
-        //*curr_iteration = prev_iteration.to_owned();
+        //The cloning is necessary, even though the size is similar.
+        *curr_iteration = prev_iteration.to_owned();
 
-        // Resizing and reassigning. It's basically the same of copying.
-        curr_iteration.resize(prev_iteration.len(), Bacter::new_stub());
-        for i in 0..prev_iteration.len() {
-            curr_iteration[i].copy(&prev_iteration[i]);
-        }
+        if self.iter_no % 20 == 0 {
+            // Generating the cells division!
+            self.collision_grid.set_points(&prev_iteration.iter().map(|bacter|
+                (bacter.get_vector().pos.x as f32, bacter.get_vector().pos.y as f32)).collect::<Vec<(f32,f32)>>());
 
-        // interacting with the other cells. Only elements of "current" will be updated!
-        for i in 0..prev_iteration.len() {
+            self.collision_grid_algae.set_points(&self.algae.iter().map(|alga|
+                (alga.get_vector().pos.x as f32, alga.get_vector().pos.y as f32)).collect::<Vec<(f32,f32)>>());
 
-            // TODO make an interact_with_cells which calls bounce_with_cells
-            // and any other interaction, including fight and eating
-            if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &prev_iteration){
-                // If interaction happened, proceeding with confrontation, eating and so forth.
-                if curr_iteration[i].try_kill_bacter(&prev_iteration[target_idx]){
-                    curr_iteration[target_idx].kill();
-                }
-            }
+            // interacting with the other cells. Only elements of "current" will be updated!
+            for cell_index in 0..self.collision_grid.get_total_cells_number(){
+                let indices_bacters = self.collision_grid.get_neighbourhood(cell_index);
+                let indices_algae = self.collision_grid_algae.get_neighbourhood(cell_index);
 
-            // Interacting with the algae
-            if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &self.algae){
-                // If interaction happened, proceeding with confrontation, eating and so forth.
-                //println!("Trying to eat alga ({} on {})", i, target_idx);
-                if curr_iteration[i].try_eat_alga( self.algae[target_idx]){
-                    self.algae[target_idx].kill();
+                for element_index in self.collision_grid.get_cell_content(cell_index) {
+                    let i = element_index.clone();
+
+                    // TODO make an interact_with_cells which calls bounce_with_cells
+                    // and any other interaction, including fight and eating
+                    if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &prev_iteration, &indices_bacters){
+                        // If interaction happened, proceeding with confrontation, eating and so forth.
+                        if curr_iteration[i].try_kill_bacter(&prev_iteration[target_idx]){
+                            curr_iteration[target_idx].kill();
+                        }
+                    }
+
+                    // Interacting with the algae
+                    if !self.algae.is_empty()
+                    {
+                        if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &self.algae, &indices_algae){
+                            // If interaction happened, proceeding with confrontation, eating and so forth.
+                            //println!("Trying to eat alga ({} on {})", i, target_idx);
+                            if curr_iteration[i].try_eat_alga( self.algae[target_idx]){
+                                self.algae[target_idx as usize].kill();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -172,9 +199,11 @@ impl Dish{
 
     fn grow_algae(&mut self)
     {
-        // growing chance: 10% // TODO FIX MAGIC NUMBER
+        // growing chance: 0.05 for a 500x500 area // TODO FIX MAGIC NUMBER
+        let grow_chance = 0.02 / 250000. * self.boundary.x * self.boundary.y;
+
         let mut rng = rand::thread_rng(); // TODO handle the random without that many threads!
-        if rng.gen::<f64>() < 0.05 && self.algae.len () < 5000 {
+        if rng.gen::<f64>() < grow_chance && self.algae.len () < 5000 {
             self.algae.push(
                 cell::Alga::new_random(self.boundary, self.algae_counter));
             self.algae_counter += 1;

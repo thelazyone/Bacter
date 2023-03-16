@@ -16,23 +16,23 @@ pub struct Float2D{
 impl Float2D
 {
     // Another associated function, taking two arguments:
-    fn new(x: f64, y: f64) -> Float2D {
+    pub fn new(x: f64, y: f64) -> Float2D {
         Float2D { x: x, y: y }
-    }    
+    }
 
-    fn multiply (&mut self, factor : f64) -> Float2D{
+    pub fn multiply (&mut self, factor : f64) -> Float2D{
         Float2D::new(self.x * factor,self.y * factor)
     }
 
-    fn distance_square (&self, other : Float2D) -> f64{
+    pub fn distance_square (&self, other : Float2D) -> f64{
         (self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y)
     }
 
-    fn distance (&self, other : Float2D) -> f64{
+    pub fn distance (&self, other : Float2D) -> f64{
         Float2D::distance_square(self, other).sqrt()
     }
 
-    fn versor (&mut self, other : Float2D) -> Float2D{
+    pub fn versor (&mut self, other : Float2D) -> Float2D{
 
         // TODO optimize this!
         Float2D{
@@ -41,10 +41,13 @@ impl Float2D
         }
     }
 
-    fn abs (&self) -> f64{
+    pub fn abs (&self) -> f64{
         self.distance(Float2D{x:0., y:0.})
     }
 
+    pub fn get_tuple(&self) -> (f64,f64) {
+        (self.x, self.y)
+    }
 }
 impl Add for Float2D{
     type Output = Self;
@@ -244,7 +247,7 @@ impl Bacter {
         }
     }
 
-    pub fn bounce_with_cells<T>(&self, current_cell: &mut Bacter, other_cells: &[T]) -> Option<usize> where
+    pub fn bounce_with_cells<T>(&self, current_cell: &mut Bacter, other_cells: &[T], indices: &Vec<usize>) -> Option<usize> where
     T: Cell{
 
         let mut last_interaction_index: Option<usize> = None;
@@ -252,7 +255,8 @@ impl Bacter {
         // Cycle on the vector of cells. for each, checking if the distance is below a certain point:
         // However, if the two are almost overlapping skipping them
         // TODO: Find a smarter way to avoid checking one cell with itself.
-        for i in 0..other_cells.len(){
+        //for i in 0..other_cells.len(){
+        for &i in indices{
             if other_cells[i].get_index() != self.index{
                 let cells_distance: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
                 let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
