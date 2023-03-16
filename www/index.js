@@ -99,7 +99,7 @@ const renderLoop = () => {
     }
 
     // Updating basic stats.
-    document.getElementById("stats").textContent="Total Bacters: " + bacters_number + " size " + pre.width + " " + pre.height;
+    document.getElementById("stats").textContent="Total Bacters: " + bacters_number;
     document.getElementById("iteration").textContent="iteration #" + universe.get_iteration();
 
   // looping, as always, with a time frame set
