@@ -9,6 +9,11 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+#[wasm_bindgen]
+pub fn wasm_memory() -> JsValue {
+    wasm_bindgen::memory()
+}
+
 // Linear data struct for WASM. It has the lifetime of the Petri object
 // so it remains reserved.
 pub struct WasmLinearDataStruct {
@@ -41,6 +46,27 @@ impl fmt::Display for Petri{
                self.statistics.iterations,
                self.statistics.bacters_number,
                self.statistics.algae_number)
+    }
+}
+
+// Non-WASM methods (used by the part after)
+impl Petri{
+    pub fn get_all_bacters_aggros_vector(&mut self) -> &Vec<f32> {
+        self.params.aggros_vec.resize(self.dish.bacters_swap_a.len(), 0.);
+        for i in 0..self.dish.bacters_swap_a.len(){
+            self.params.aggros_vec[i] = self.dish.bacters_swap_a[i].get_aggro();
+        }
+
+        &self.params.aggros_vec
+    }
+
+    pub fn get_all_bacters_sizes_vector(&mut self) -> &Vec<f32> {
+        self.params.sizes_vec.resize(self.dish.bacters_swap_a.len(), 0.);
+        for i in 0..self.dish.bacters_swap_a.len(){
+            self.params.sizes_vec[i] = self.dish.bacters_swap_a[i].get_size();
+        }
+
+        &self.params.sizes_vec
     }
 }
 
@@ -101,25 +127,20 @@ impl Petri{
         self.dish.algae.len() as u32
     }
 
+
+
     // Filling the WASM-dedicated linear vectors with floats, and exposing the pointer.
     // As long as the software is synchronous this should be safe as is.
 
     // Aggros linear vector
     pub fn get_all_bacters_aggros(&mut self) -> *const f32{
-        self.params.aggros_vec.resize(self.dish.bacters_swap_a.len(), 0.);
-        for i in 0..self.dish.bacters_swap_a.len(){
-            self.params.aggros_vec[i] = self.dish.bacters_swap_a[i].get_aggro();
-        }
-        self.params.aggros_vec.as_ptr()
+        self.get_all_bacters_aggros_vector().as_ptr()
     }
 
     // Sizes linear vector
     pub fn get_all_bacters_sizes(&mut self) -> *const f32{
-        self.params.sizes_vec.resize(self.dish.bacters_swap_a.len(), 0.);
-        for i in 0..self.dish.bacters_swap_a.len(){
-            self.params.sizes_vec[i] = self.dish.bacters_swap_a[i].get_size();
-        }
-        self.params.sizes_vec.as_ptr()
+        self.get_all_bacters_sizes_vector().as_ptr()
+
     }
 
     // Positions (interlaced x-y) linear vector

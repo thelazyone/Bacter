@@ -20,7 +20,7 @@ impl Float2D
         Float2D { x: x, y: y }
     }
 
-    pub fn multiply (&mut self, factor : f64) -> Float2D{
+    pub fn multiply (&self, factor : f64) -> Float2D{
         Float2D::new(self.x * factor,self.y * factor)
     }
 
@@ -29,10 +29,11 @@ impl Float2D
     }
 
     pub fn distance (&self, other : Float2D) -> f64{
+
         Float2D::distance_square(self, other).sqrt()
     }
 
-    pub fn versor (&mut self, other : Float2D) -> Float2D{
+    pub fn versor_from(&self, other : Float2D) -> Float2D{
 
         // TODO optimize this!
         Float2D{
@@ -41,8 +42,16 @@ impl Float2D
         }
     }
 
+
     pub fn abs (&self) -> f64{
         self.distance(Float2D{x:0., y:0.})
+    }
+
+    pub fn versor(&self) -> Float2D{
+        Float2D{
+            x: (self.x) / self.abs(),
+            y: (self.y) / self.abs(),
+        }
     }
 
     pub fn get_tuple(&self) -> (f64,f64) {
@@ -247,7 +256,13 @@ impl Bacter {
         }
     }
 
-    pub fn bounce_with_cells<T>(&self, current_cell: &mut Bacter, other_cells: &[T], indices: &Vec<usize>) -> Option<usize> where
+    pub fn bounce_with_cells<T>(
+        &self,
+        current_cell: &mut Bacter,
+        other_cells: &[T],
+        indices: &Vec<usize>,
+        is_prey: bool, // note that this kills the polimorpism.
+    ) -> Option<usize> where
     T: Cell{
 
         let mut last_interaction_index: Option<usize> = None;
@@ -257,21 +272,48 @@ impl Bacter {
         // TODO: Find a smarter way to avoid checking one cell with itself.
         //for i in 0..other_cells.len(){
         for &i in indices{
-            if other_cells[i].get_index() != self.index{
-                let cells_distance: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
-                let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
-                if  cells_distance > 0.1 && cells_distance < cells_impact_distance * cells_impact_distance {
+            if other_cells[i].get_index() == self.index {
+                continue;
+            }
 
-                    // Reversing the speed:
-                    // V = |V| * -ver(A-B) 
-                    current_cell.bacter_vector.vel =
-                        self.bacter_vector.pos.clone()
-                            .versor(other_cells[i].get_vector().pos)
-                            .multiply(self.bacter_vector.vel.abs());
+            let cells_distance_square: f64 = self.bacter_vector.pos.distance_square(other_cells[i].get_vector().pos);
+            let cells_impact_distance = 10. * (self.get_size() + other_cells[i].get_size()) as f64;
 
-                    // updating the interacting index:
-                    last_interaction_index = Some(i);
+            if  cells_distance_square > 0.1 && cells_distance_square < cells_impact_distance * cells_impact_distance {
+
+                // Reversing the speed:
+                // V = |V| * -ver(A-B)
+                current_cell.bacter_vector.vel =
+                    self.bacter_vector.pos.clone()
+                        .versor_from(other_cells[i].get_vector().pos)
+                        .multiply(self.bacter_vector.vel.abs());
+
+                // updating the interacting index:
+                last_interaction_index = Some(i);
+            }
+
+            // If the other cell is not too close, depending on aggression or not the speed of the cell is changed.
+            else if cells_distance_square > 0.1 && cells_distance_square < 10000. {
+                let acceleration_factor = 0.2 * (1. - self.size as f64); // TODO remove magic number
+                let mut attraction_factor : f64;
+                if is_prey{
+                    attraction_factor =  self.aggro as f64 - 0.5;
                 }
+                else {
+                    attraction_factor = 1. - self.aggro as f64;
+                    //println!("attr {}", attraction_factor);
+                }
+                attraction_factor *= 300. / cells_distance_square; // TODO again magic number
+
+                // First determine the new direction:
+                current_cell.bacter_vector.vel = self.bacter_vector.pos.versor_from(other_cells[i].get_vector().pos)
+                    .multiply(-attraction_factor * acceleration_factor).add(self.bacter_vector.vel);
+            }
+
+            // clamping max speed
+            let max_speed = 1. - self.size as f64 * 0.5; // TODO again magic number
+            if current_cell.bacter_vector.vel.abs() > max_speed {
+                current_cell.bacter_vector.vel = current_cell.bacter_vector.vel.multiply(max_speed / current_cell.bacter_vector.vel.abs());
             }
         }
 
@@ -348,11 +390,14 @@ impl Bacter {
         // Note that the "victim" cannot fight back.
         let mut rng = rand::thread_rng();
         if rng.gen::<f32>() < self.aggro{
-            // Adding a +- 0.5 chance to the size of the two.
-            if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
 
+            // Kill is scored if a random is above the size difference
+            // Adding a +- 0.5 chance to the size of the two.
+            let size_difference = self.get_size() - other.get_size();
+            if rng.gen::<f32>() - 0.5 < size_difference{
+            //if self.get_size() > other.get_size() + rng.gen::<f32>() - 0.5{
                 // the victim is killed, and the food transfered to capacity to the one eating.
-                self.food_value += other.food_value * 0.5; // TODO add a dampening factor?
+                self.food_value += other.food_value * 0.5; // TODO magic number!
                 return true;
             }
         }

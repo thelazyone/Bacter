@@ -113,7 +113,11 @@ impl Dish{
 
                     // TODO make an interact_with_cells which calls bounce_with_cells
                     // and any other interaction, including fight and eating
-                    if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &prev_iteration, &indices_bacters){
+                    if let Some(target_idx) = prev_iteration[i].bounce_with_cells(
+                        &mut curr_iteration[i],
+                        &prev_iteration,
+                        &indices_bacters,
+                        true){
                         // If interaction happened, proceeding with confrontation, eating and so forth.
                         if curr_iteration[i].try_kill_bacter(&prev_iteration[target_idx]){
                             curr_iteration[target_idx].kill();
@@ -123,7 +127,11 @@ impl Dish{
                     // Interacting with the algae
                     if !self.algae.is_empty()
                     {
-                        if let Some(target_idx) = prev_iteration[i].bounce_with_cells(&mut curr_iteration[i], &self.algae, &indices_algae){
+                        if let Some(target_idx) = prev_iteration[i].bounce_with_cells(
+                            &mut curr_iteration[i],
+                            &self.algae,
+                            &indices_algae,
+                        false){
                             // If interaction happened, proceeding with confrontation, eating and so forth.
                             //println!("Trying to eat alga ({} on {})", i, target_idx);
                             if curr_iteration[i].try_eat_alga( self.algae[target_idx]){
