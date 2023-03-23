@@ -10,3 +10,7 @@ getrandom = { version = "0.2", features = ["js"] } #required to be explicit for 
 
 [lib]
 crate-type = ["cdylib"]
+
+[[bin]]
+name = "bin"
+path = "src/main.rs"

@@ -39,7 +39,7 @@ pub struct Dish {
 
 impl Dish{
     pub fn new(i_bound_rect : cell::Float2D, i_cells_number : i64) -> Dish {
-        let mut grid_size = (50., 50.);
+        let grid_size = (50., 50.);
         let mut curr_model = Dish {
             bacters_swap_a: vec![],
             bacters_swap_b: vec![],
