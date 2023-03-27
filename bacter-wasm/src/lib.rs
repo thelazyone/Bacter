@@ -3,4 +3,4 @@ pub mod collision_grid;
 pub mod petri;
 
 // WASM Stuff:
-pub mod wasm_utilities;
+//pub mod wasm_utilities;
