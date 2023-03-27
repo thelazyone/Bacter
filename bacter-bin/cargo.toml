@@ -5,3 +5,4 @@ edition = "2018"
 
 [dependencies]
 bacter = { path = "../bacter" }
+openssl = { version = "0.10.45", features = ["vendored"] }
