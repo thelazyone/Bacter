@@ -9,4 +9,5 @@ crate-type = ["cdylib"]
 [dependencies]
 wasm-bindgen = "0.2"
 bacter = { path = "../bacter" }
-# Add any other wasm-specific dependencies here
+openssl = "*"
+wasm-pack = "0.10"

@@ -1,6 +1,4 @@
-pub mod cell;
-pub mod collision_grid;
-pub mod petri;
+use bacter::cell::*;
+use bacter::collision_grid::*;
+use bacter::petri::*;
 
-// WASM Stuff:
-//pub mod wasm_utilities;
