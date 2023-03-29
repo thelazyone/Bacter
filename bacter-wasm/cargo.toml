@@ -4,10 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+bacter = { path = "../bacter", features = ["wasm"] }
 wasm-bindgen = "0.2"
-bacter = { path = "../bacter" }
-openssl = "*"
-wasm-pack = "0.10"

@@ -151,6 +151,7 @@ name = "bacter-bin"
 version = "0.1.0"
 dependencies = [
  "bacter",
+ "openssl",
 ]
 
 [[package]]
@@ -158,9 +159,7 @@ name = "bacter-wasm"
 version = "0.1.0"
 dependencies = [
  "bacter",
- "openssl",
  "wasm-bindgen",
- "wasm-pack",
 ]
 
 [[package]]

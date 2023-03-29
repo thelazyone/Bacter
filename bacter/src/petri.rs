@@ -1,6 +1,7 @@
 use crate::cell::*;
 use crate::cell::cell::Cell;
 
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -9,6 +10,8 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn wasm_memory() -> JsValue {
     wasm_bindgen::memory()
@@ -24,7 +27,7 @@ pub struct WasmLinearDataStruct {
 }
 
 // Low-effort stats for the simulation
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Statistics {
     iterations: u32,
     bacters_number: u32,
@@ -32,7 +35,7 @@ pub struct Statistics {
 }
 
 // Entry point for the simulator. The Petri dish is where all the action occurrs
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Petri {
     statistics: Statistics,
     dish: dish::Dish,
@@ -71,7 +74,7 @@ impl Petri{
 }
 
 // Public methods to be binded into WASM
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 impl Petri{
 
     // Default Constructor
