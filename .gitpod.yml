@@ -8,21 +8,4 @@ image:
 
 
 tasks:
-  # The setup performs multiple tasks: 
-  # - Installing wasm-bindgen
-  # - Installing wasm-pack
-  # - Building the current code with wasm-pack
-  # - Set-up NPM and start it
-  - name:  Setting up... well, everything. 
-    # init: |
-    #   rustup target add wasm32-unknown-unknown
-    #   cargo install wasm-bindgen-cli 
-    #   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-    command: | 
-      wasm-pack build
-      cd www
-      npm install
-      npm run start
-
 # For every change, you gotta build with wasm-pack build!
