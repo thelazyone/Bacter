@@ -1,6 +1,20 @@
 # Bacter
 **A simple evolution simulator with basic cellular automata**
 
+## Usage
+The project can be used through a simple terminal program or through a WASM application.
+Both applications depend from the <code>bacter</code> library.
+
+### bacter-bin
+To build and run the project for terminal, simply run
+<code>cargo build -p bacter-bin --release</code> and/or <code>cargo run -p bacter-bin --release</code>
+Currently the project displays a rudimentary ASCII 2D histogram of parameter distribution of the bacters. In the future a proper CLI would be nice to have.
+
+### bacter-wasm
+The project <code>bacter-wasm</code> derives from <code>bacter</code> enabling the <code>wasm-bindgen</code> binding. 
+In order to build it you can go in the bacter-wasm subfolder and run <code>wasm-pack build --target web</code> or (recommended) from the main folder call <code>cargo run -p wasm-builder --release</code>. 
+In any case it is possible to deploy the compiled wasm by starting a server (such as <code>python -m http.server</code>) in /bacter-wasm , where a properly set up index.html is present.
+
 ## Global Scope
 The application of genetic algorithms is a widespread and relatively efficient solution for optimizations in many fields. Removing all the usefulness from that, it is possible to simulate the environment of very simple entities while they compete for food and get a chance to multiply while passing a slightly modified version of their own parameters to the offsprings.
 The goal of this project is to observe not only how the population will move through generations towards one or more "local minima" in the parameters space, but also how the minima itself change with the mutating generations
