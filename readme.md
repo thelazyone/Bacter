@@ -1,7 +1,7 @@
 # Bacter
 **A simple evolution simulator with basic cellular automata**
 
-[Live Demo](https://fsd.thelazyforger.com/bacter_test/index.html)
+[Live Demo](https://test.thelazyforger.com/bacter_test/index.html)
 
 ## Usage
 The project can be used through a simple terminal program or through a WASM application.
